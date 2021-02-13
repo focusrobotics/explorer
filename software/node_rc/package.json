@@ -1,0 +1,10 @@
+{
+    "name": "explorer-server",
+    "version": "0.0.1",
+    "description": "Provides the API and serves control pages for the Explorer robot.",
+    "main": "basic_server.js",
+    "license": "MIT",
+    "dependencies": {
+        "serialport": "^9.0.2"
+    }
+}

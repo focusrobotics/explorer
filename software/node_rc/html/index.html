@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="http://www/www/js/bootstrap-4.5.3-dist/css/bootstrap.min.css">
+    <!-- <script src="http://www/projects/robots/explorer/software/node_server/html/JoyStick/joy.js"></script> -->
+    <script src="JoyStick/joy.js"></script>
+    <title>Explorer Robot Interface</title>
+
+    <script type="text/javascript">
+      var robotCtl = {jsy:0, jsx:0};
+      function forward() {
+	  robotCtl.jsy += 10;
+	  sendRobotCtl(robotCtl);
+      }
+      function backward() {
+	  robotCtl.jsy -= 10;
+	  sendRobotCtl(robotCtl);
+      }
+      function stop() {
+	  robotCtl.jsy = 0;
+	  robotCtl.jsx = 0;
+	  sendRobotCtl(robotCtl);
+      }
+      function left() {
+	  robotCtl.jsx -= 10;
+	  sendRobotCtl(robotCtl);
+      }
+      function right() {
+	  robotCtl.jsx += 10;
+	  sendRobotCtl(robotCtl);
+      }
+      function sendRobotCtl(rctl) {
+	  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+	  xmlhttp.open("POST", "/api");
+	  xmlhttp.setRequestHeader("Content-Type", "application/json");
+	  xmlhttp.send(JSON.stringify(rctl));
+      }
+      function updateRobotFromJoyStick() {
+	  robotCtl.jsy = Joy1.GetY();
+	  robotCtl.jsx = Joy1.GetX();
+	  console.log("updating " + robotCtl.jsy)
+	  sendRobotCtl(robotCtl);
+      }
+      function setupJoyStick() {
+	  //setInterval(updateRobotFromJoyStick, 100);
+      }
+    </script>
+    
+  </head>
+  
+  <body onload="setupJoyStick()">
+    This page will control the robot named Explorer
+    <div>
+      <video controls width=320 height=240>
+	<source src = "/cam/stream.mjpg"
+		type = "video/mjpeg">
+      </video>
+    </div>
+    <!--
+	<div id="joy1Div" style="width:200px;height:200px;margin:50px"></div>
+	<script> var Joy1 = new JoyStick('joy1Div'); </script>
+    -->
+    <div class="container-fluid">
+      <p><button type="button" onclick="forward()">Forward</button></p>
+      <p>
+	<button type="button" onclick="left()">Left</button>
+	<button type="button" onclick="stop()">Stop</button>
+	<button type="button" onclick="right()">Right</button>
+      </p>
+      <p><button type="button" onclick="backward()">Backward</button></p>
+    </div>
+
+    <div class="container-fluid">
+      <a href="status_page.html">status page</a>
+    </div>
+
+  </body>
+
+</html>
