@@ -2,6 +2,7 @@
 Software, firmware, CAD models for a 12" round differential drive robot
 
 ## Documentation
+HTML files are located in the doc directory
 
 ## Firmware Build
 * install platformio for your system https://platformio.org/
@@ -14,4 +15,5 @@ The robot can be remote controlled via any web browser. This is done with a node
 * in the software/node_rc directory run 'node rc_server.js'
 
 ## HW Details
+The hardware directory contains openscad and other drawings
 
