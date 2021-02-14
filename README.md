@@ -2,7 +2,8 @@
 Software, firmware, CAD models for a 12" round differential drive robot
 
 ## Documentation
-HTML files are located in the doc directory
+Most documentation is in the wiki https://github.com/focusrobotics/explorer/wiki
+HTML, pdf, and image files are located in the doc directory
 
 ## Firmware Build
 * install platformio for your system https://platformio.org/
