@@ -94,7 +94,7 @@ void setup() {
   //Serial.begin(9600);           // set up Serial library for debug at 9600 bps
   //Serial.println("Fetch Robot starting up...");
   Serial.begin(115200);
-  
+  mot.setup();
   rpman.setup();
   jsctl.setup();
   jsctl.register_test(&rpman);  // register rpman with jsctl

@@ -69,8 +69,8 @@ void RPManual::loop(rpctl_info* ctl) {
   lpow /= (abs(ctl->jsx)+1);
   int16_t rpow = lpow;
 
-  lpow += ctl->jsx * 2;
-  rpow -= ctl->jsx * 2;
+  lpow -= ctl->jsx * 2;
+  rpow += ctl->jsx * 2;
 
   if(lpow != lMotorPower || rpow != rMotorPower) {
     //Serial.print("rpman jsx ");

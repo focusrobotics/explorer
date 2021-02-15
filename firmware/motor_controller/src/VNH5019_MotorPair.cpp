@@ -62,48 +62,48 @@ void VNH5019_MotorPair::setup() {
 }
 
 void VNH5019_MotorPair::set_speed(motor_select_t mot, int16_t speed) {
-  //  md.setM1Speed(leftSpeed); // Accepts -400 to +400
-  //  md.setM2Speed(rightSpeed);
-  // input speed is +/-1023. To scale to +/-400 I must divide by 2.5
+  // input speed is +/-1023. For analogWrite I must scale to 0-255.
   int16_t pow = abs(speed) / 4;
   if(mot==RIGHT_MOTOR) {
-    //md.setM1Speed(speed/2.5);
     if(speed>0) { // clockwise for positive speed
       digitalWrite(_INA1, HIGH);
       digitalWrite(_INB1, LOW);
       analogWrite(_PWM1, pow);
+      Serial.print("Set m1 fwd with pwr ");
 
     } else if(speed<0) { // counterclockwise for negative speed
       digitalWrite(_INA1, LOW);
       digitalWrite(_INB1, HIGH);
       analogWrite(_PWM1, pow);
+      Serial.print("Set m1 rev with pwr ");
 
     } else { // speed == 0
       digitalWrite(_INA1, LOW);
       digitalWrite(_INB1, LOW);
       analogWrite(_PWM1, pow);
+      Serial.print("Set m1 stopped with pwr ");
 
     }
-    Serial.print("Set m1 to ");
   } else {
-    //md.setM2Speed(speed/2.5);
     if(speed>0) { // clockwise for positive speed
       digitalWrite(_INA2, HIGH);
       digitalWrite(_INB2, LOW);
       analogWrite(_PWM2, pow);
+      Serial.print("Set m2 fwd with pwr ");
 
     } else if(speed<0) { // counterclockwise for negative speed
       digitalWrite(_INA2, LOW);
       digitalWrite(_INB2, HIGH);
       analogWrite(_PWM2, pow);
+      Serial.print("Set m2 rev with pwr ");
 
     } else { // speed == 0
       digitalWrite(_INA2, LOW);
       digitalWrite(_INB2, LOW);
       analogWrite(_PWM2, pow);
+      Serial.print("Set m2 stopped with pwr ");
 
     }
-    Serial.print("Set m2 to ");
   }
   Serial.println(pow);
 }
