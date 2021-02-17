@@ -44,7 +44,8 @@ const server = http.createServer((req, res) => {
         });
 
     } else if(req.url == '/cam/stream.jpg') {
-	fs.readFile(__dirname + "/snapshot.jpg", (err, data) => {
+	//fs.readFile(__dirname + "/snapshot.jpg", (err, data) => {
+	fs.readFile("/mnt/ramdisk/snapshot.jpg", (err, data) => {
 	    res.setHeader('Content-Type', 'image/jpeg');
 	    res.setHeader('Cache-Control', 'no-store, max-age=0');
 	    res.writeHead(200);
