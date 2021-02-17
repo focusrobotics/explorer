@@ -46,7 +46,7 @@
 	  sendRobotCtl(robotCtl);
       }
       function setupJoyStick() {
-	  //setInterval(updateRobotFromJoyStick, 100);
+	  setInterval(updateRobotFromJoyStick, 100);
 	  //displayImage();
 	  //console.log("foo");
 	  setInterval(displayImage, 200);
@@ -73,10 +73,8 @@
       <canvas id="myCanvas" width="640" height="480"></canvas>
       
     </div>
-    <!--
 	<div id="joy1Div" style="width:200px;height:200px;margin:50px"></div>
 	<script> var Joy1 = new JoyStick('joy1Div'); </script>
-    -->
     <div class="container-fluid">
       <p><button type="button" onclick="forward()">Forward</button></p>
       <p>
