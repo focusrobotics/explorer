@@ -1,13 +1,21 @@
+// 
+// 
+// 
 const http = require('http');
 const fs = require('fs');
-const SerialPort = require('serialport');
-const sp = new SerialPort('/dev/ttyACM0', {
-    baudRate: 115200
-})
-const Readline = require('@serialport/parser-readline')
 
-//const port = process.env.PORT; // get the port to run on from the environment
-const port = 3000;
+const useSerial = !process.env.NO_SERIAL; // set NO_SERIAL in the environment to run without serial port deps
+console.log("useSerial == " + useSerial);
+const port = process.env.PORT || 3000; // get the port to run on from the environment or default to 3000
+
+const SerialPort = require('serialport');
+const Readline = require('@serialport/parser-readline')
+var sp;
+if(useSerial) {
+    sp = new SerialPort('/dev/ttyACM0', {
+	baudRate: 115200
+    })
+}
 
 const mimeTypes = {
     "html": "text/html",
@@ -35,9 +43,10 @@ const server = http.createServer((req, res) => {
 	    res.end(data);
         });
 
-    } else if(req.url == '/cam/stream.mjpg') {
-	fs.readFile(__dirname + "/robots.jpg", (err, data) => {
+    } else if(req.url == '/cam/stream.jpg') {
+	fs.readFile(__dirname + "/snapshot.jpg", (err, data) => {
 	    res.setHeader('Content-Type', 'image/jpeg');
+	    res.setHeader('Cache-Control', 'no-store, max-age=0');
 	    res.writeHead(200);
 	    res.end(data);
         });
@@ -67,13 +76,16 @@ const server = http.createServer((req, res) => {
 	    })
 	    req.on('end', () => {
 		let parsedData = JSON.parse(rawData)
-		//console.log(rawData)
-		sp.write(rawData, function(err) {
-		    if (err) {
-			return console.log('Error on write: ', err.message)
-		    }
-		    //console.log('message written')
-		})
+		if(useSerial) {
+		    sp.write(rawData, function(err) {
+			if (err) {
+			    return console.log('Error on write: ', err.message)
+			}
+			//console.log('message written')
+		    })
+		} else {
+		    console.log("Serial port not connected, would write: " + rawData)
+		}
 	    })
 	    res.statusCode = 200;
 	    res.end();
@@ -136,7 +148,8 @@ server.listen(port, () => {
 //  console.log('Data:', data)
 //})
 
-const lines = sp.pipe(new Readline())
-lines.on('data', console.log)
-
+if(useSerial) {
+    const lines = sp.pipe(new Readline())
+    lines.on('data', console.log)
+}
 
