@@ -30,6 +30,12 @@ const mimeTypes = {
 
 const html_dir = __dirname + "/html";
 
+const testing = process.env.TESTING;
+var liveSnap = "/mnt/ramdisk/snapshot.jpg";
+if(testing) {
+    liveSnap = __dirname + "/snapshot.jpg";
+}
+
 // Don't create the response at all until req.url is considered
 // if req.url starts with /api then pass it to the robot api object which will respond with json
 // if req.url starts with /video (maybe /camera or /cam is better) then pass it to the streaming class
@@ -45,7 +51,7 @@ const server = http.createServer((req, res) => {
 
     } else if(req.url == '/cam/stream.jpg') {
 	//fs.readFile(__dirname + "/snapshot.jpg", (err, data) => {
-	fs.readFile("/mnt/ramdisk/snapshot.jpg", (err, data) => {
+	fs.readFile(liveSnap, (err, data) => {
 	    res.setHeader('Content-Type', 'image/jpeg');
 	    res.setHeader('Cache-Control', 'no-store, max-age=0');
 	    res.writeHead(200);

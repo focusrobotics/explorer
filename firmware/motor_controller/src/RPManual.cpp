@@ -66,11 +66,22 @@ void RPManual::loop(rpctl_info* ctl) {
   // But that significan slowdown may not be good--not sure
   // Then add joyx*2 to left and subtract it from right, I think that will allow for low speed turning
   int16_t lpow = (ctl->jsy * 10);
-  lpow /= (abs(ctl->jsx)+1);
+  int16_t turn_reducer = abs(ctl->jsx) * 2;
+  if(turn_reducer > abs(lpow)) { turn_reducer = lpow; }
+  if(lpow > 0) {
+    lpow = lpow - turn_reducer;
+  } else {
+    lpow = lpow + turn_reducer;
+  }
   int16_t rpow = lpow;
 
-  lpow -= ctl->jsx * 2;
-  rpow += ctl->jsx * 2;
+  lpow -= ctl->jsx * 4;
+  rpow += ctl->jsx * 4;
+
+  if(lpow > 1023) {lpow = 1023;}
+  if(lpow < -1023) {lpow = -1023;}
+  if(rpow > 1023) {rpow = 1023;}
+  if(rpow < -1023) {rpow = -1023;}
 
   if(lpow != lMotorPower || rpow != rMotorPower) {
     //Serial.print("rpman jsx ");
