@@ -92,7 +92,7 @@ const server = http.createServer((req, res) => {
 		// The client needs to send {startStream:1} to start the raspistill subprocess and {startStream:0} to stop it
 		if(parsedData.startStream) {
 		    console.log("Starting camera stream");
-		    const cs = spawn('raspistill', ['-vf', '-hf', '-w', '640', '-h', '480', '-o', '/mnt/ramdisk/snapshot.jpg', '-tl', '200', '-t', '600000']);
+		    const cs = spawn('raspistill', ['-vf', '-hf', '-w', '640', '-h', '480', '-o', '/mnt/ramdisk/snapshot.jpg', '-tl', '100', '-t', '600000']);
 		    cs.on('error', (err) => {
 			console.log("Error when trying to spawn raspistill: " + err);
 		    });
@@ -139,7 +139,17 @@ const server = http.createServer((req, res) => {
 		console.log(parsedData);
 		if(parsedData.shutdown == 'true') {
 		    console.log("Shut down now!");
-		    const po = spawn(poweroffCommand);
+		    const po = spawn('sudo', ['poweroff']);
+		    po.on('error', (err) => {
+                        console.log("Error when trying to spawn poweroff: " + err);
+                    });
+		    po.stdout.on('data', (data) => {
+                        console.log("stdout when trying to spawn poweroff: " + data);
+                    });
+		    po.stderr.on('data', (data) => {
+                        console.log("stdout when trying to spawn poweroff: " + data);
+                    });
+
 		}
 		if(useSerial) {
 		    sp.write(rawData, function(err) {

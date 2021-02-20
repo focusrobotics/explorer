@@ -76,7 +76,7 @@
 	      clearInterval(ifaceState.streamInterval);
 	  } else {
 	      ifaceState.stream = 1;
-	      ifaceState.streamInterval = setInterval(displayImage, 1000);
+	      ifaceState.streamInterval = setInterval(displayImage, 100);
 	      var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
 	      xmlhttp.open("POST", "/cam/api");
 	      xmlhttp.setRequestHeader("Content-Type", "application/json");
@@ -91,7 +91,7 @@
 	      clearInterval(ifaceState.joystickInterval);
 	  } else {
 	      ifaceState.joystick = 1;
-	      ifaceState.joystickInterval = setInterval(updateRobotFromJoyStick, 1000);
+	      ifaceState.joystickInterval = setInterval(updateRobotFromJoyStick, 100);
 	  }
       }
 
