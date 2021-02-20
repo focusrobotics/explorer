@@ -30,10 +30,20 @@ const mimeTypes = {
 
 const html_dir = __dirname + "/html";
 
-const testing = process.env.TESTING;
-var liveSnap = "/mnt/ramdisk/snapshot.jpg";
-if(testing) {
-    liveSnap = __dirname + "/snapshot.jpg";
+// Perhaps better would be to have the image come directly to the stdout of raspistill and read from that
+// When I'm not running on a raspi or just not running video I want the image to be a camera with a line through it
+// 
+const liveImages = !process.env.NO_LIVE_IMAGES;
+console.log("liveImages==" + liveImages);
+var liveSnap = __dirname + "/snapshot.jpg";
+if(liveImages) {
+    liveSnap = "/mnt/ramdisk/snapshot.jpg";
+}
+
+const { spawn } = require('child_process');
+var poweroffCommand = 'poweroff';
+if(process.env.HOSTNAME != "explorer") {
+    poweroffCommand = 'echo';
 }
 
 // Don't create the response at all until req.url is considered
@@ -42,14 +52,20 @@ if(testing) {
 // if req.url is just a / then return index.html
 // otherwise attempt to return the file in req.url
 const server = http.createServer((req, res) => {
+    // This first if case just covers the default route when you do a get on the server with no path. It returns index.html
+    // which is the default robot control page. Access to other paths on the server is called out below.
     if(req.url == '/') {
 	fs.readFile(html_dir + "/index.html", (err, data) => {
 	    res.setHeader("Content-Type", "text/html");
 	    res.writeHead(200);
 	    res.end(data);
         });
+    }
 
-    } else if(req.url == '/cam/stream.jpg') {
+    // The /cam/stream.jpg endoint returns the latest jpg image captured from the camera which is basically a live stream if the camera
+    // is capturing at a high rate. This produces somewhat higher latency that I'd like in the browser so it would probably be better
+    // to send the livestream via websockets in the future. This works for now though.
+    else if(req.url == '/cam/stream.jpg') {
 	//fs.readFile(__dirname + "/snapshot.jpg", (err, data) => {
 	fs.readFile(liveSnap, (err, data) => {
 	    res.setHeader('Content-Type', 'image/jpeg');
@@ -57,24 +73,12 @@ const server = http.createServer((req, res) => {
 	    res.writeHead(200);
 	    res.end(data);
         });
+    }
 
-    } else if(req.url == '/cam/api') {
-	res.statusCode = 200;
-	res.setHeader('Content-Type', 'text/html');
-	res.write('<h1>Welcome to the camera api!</h1>');
-	res.write(req.url);
-	res.end();
-	
-    } else if(req.url == '/api') {
-	// The /api endpoint accepts POST requests with type application/json
-	//  these posts will give control data to the robot such as joystick and button state
-	// It will also accept GET requests and return type application/json
-	//  these gets will return sensor data from the robot such as encoder counts and sonar distances
-	//  and motor current and IMU measurements.
-	//  The returned data will be selectable via the api with POSTs since everything all the time
-	//  might be too much after the initial prototype. Also I'll only care about some data at any
-	//  given time.
-	// This API should be handled by a separate object. I'm just in-lining the code here to get started
+
+    // The /cam/api endpoint can be used to turn the camera stream on and off and set params with POST or get information about the camera with GET
+    // 
+    else if(req.url == '/cam/api') {
 	const contentType = req.headers['content-type'];
 	if(req.method=='POST' && contentType=='application/json') {
 	    let rawData = ''
@@ -83,6 +87,57 @@ const server = http.createServer((req, res) => {
 	    })
 	    req.on('end', () => {
 		let parsedData = JSON.parse(rawData)
+		console.log("Got this data from the camera API: " + rawData);
+		// FIXME: add startStream option so that the raspistill program is only started when requested
+		// The client needs to send {startStream:1} to start the raspistill subprocess and {startStream:0} to stop it
+		if(parsedData.startStream) {
+		    console.log("Starting camera stream");
+		    const cs = spawn('raspistill', ['-vf', '-hf', '-w', '640', '-h', '480', '-o', '/mnt/ramdisk/snapshot.jpg', '-tl', '200', '-t', '600000']);
+		} else {
+		    console.log("Stopping camera stream");
+		}
+	    })
+	    res.statusCode = 200;
+	    res.end();
+	} else if(req.method=='GET') {
+	    res.statusCode = 200;
+	    res.setHeader('Content-Type', 'application/json');
+	    let mydata = {livestream:liveImages, serial:useSerial}
+	    res.write(JSON.stringify(mydata));
+	    res.end();
+	} else {
+	    res.statusCode = 404;
+	    res.end();
+	}
+    }
+
+
+    // The /api endpoint accepts POST requests with type application/json
+    //  these posts will give control data to the robot such as joystick and button state
+    // It will also accept GET requests and return type application/json
+    //  these gets will return sensor data from the robot such as encoder counts and sonar distances
+    //  and motor current and IMU measurements.
+    //  The returned data will be selectable via the api with POSTs since everything all the time
+    //  might be too much after the initial prototype. Also I'll only care about some data at any
+    //  given time.
+    // This API should be handled by a separate object. I'm just in-lining the code here to get started
+    // This informaiton transfer should probably be handled with websockets to lower the latency and overhead.
+    // It is logically a persistant connection and it probably doesn't make sense to keep openeing up a new connection for every transfer.
+    else if(req.url == '/api') {
+	const contentType = req.headers['content-type'];
+	if(req.method=='POST' && contentType=='application/json') {
+	    let rawData = ''
+	    req.on('data', chunk => {
+		rawData += chunk
+	    })
+	    req.on('end', () => {
+		let parsedData = JSON.parse(rawData)
+		// FIXME: if the parsedData includes shutdown:true then call poweroff for the raspi!
+		console.log(parsedData);
+		if(parsedData.shutdown == 'true') {
+		    console.log("Shut down now!");
+		    const po = spawn(poweroffCommand);
+		}
 		if(useSerial) {
 		    sp.write(rawData, function(err) {
 			if (err) {
@@ -107,7 +162,12 @@ const server = http.createServer((req, res) => {
 	    res.statusCode = 404;
 	    res.end();
 	}
-    } else {
+    }
+
+    // Finally, this route covers everything else. If a request gets here and the path provided exists in the html dir and
+    // is of a known mime type then the file will be returned just like in a normal web server. This allows for external css
+    // and js files, documentation, and anything else I can think up.
+    else {
 	const filename = html_dir + req.url;
 	fs.exists(filename, function(exists) {
 	    if(!exists) {

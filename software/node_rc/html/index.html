@@ -3,15 +3,25 @@
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="http://www/www/js/bootstrap-4.5.3-dist/css/bootstrap.min.css">
-    <!-- <script src="http://www/projects/robots/explorer/software/node_server/html/JoyStick/joy.js"></script> -->
+    <meta name="viewport" content="width=device-width; user-scalable=0">
+
+    <style>
+      h1,a,div {
+	  text-align: center;
+      }
+      canvas {
+	  display: block;
+	  margin-left: auto;
+	  margin-right: auto;
+      }
+    </style>
+    
     <script src="JoyStick/joy.js"></script>
     <title>Explorer Robot Interface</title>
 
     <script type="text/javascript">
       var robotCtl = {jsy:0, jsx:0};
+      var ifaceState = {stream:0, joystick:0};
       function forward() {
 	  robotCtl.jsy += 10;
 	  sendRobotCtl(robotCtl);
@@ -33,12 +43,18 @@
 	  robotCtl.jsx += 10;
 	  sendRobotCtl(robotCtl);
       }
+
+      // Sends a POST command to the robot API
+      // I may want to send the actual motor power here, or at least have the option to, so that the conversion math
+      // from joystick x,y to motor power is done in a more easily updatable place.
       function sendRobotCtl(rctl) {
 	  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
 	  xmlhttp.open("POST", "/api");
 	  xmlhttp.setRequestHeader("Content-Type", "application/json");
 	  xmlhttp.send(JSON.stringify(rctl));
       }
+
+      // Should only send the update if it is different or if one hasn't been sent in a while
       function updateRobotFromJoyStick() {
 	  robotCtl.jsy = Joy1.GetY();
 	  robotCtl.jsx = Joy1.GetX();
@@ -46,10 +62,45 @@
 	  sendRobotCtl(robotCtl);
       }
       function setupJoyStick() {
-	  setInterval(updateRobotFromJoyStick, 1000);
+	  //setInterval(updateRobotFromJoyStick, 1000);
 	  //displayImage();
 	  //console.log("foo");
-	  setInterval(displayImage, 2000);
+	  //setInterval(displayImage, 2000);
+      }
+
+      // Initially toggling the camera stream would just turn on or off the setInterval call. Could be a rate there too.
+      // Later on it might actually make an api call to start the stream over the websocket and things just get blindly updated here in the browser.
+      function toggleLiveCameraStream() {
+	  if(ifaceState.stream) {
+	      ifaceState.stream = 0;
+	      clearInterval(ifaceState.streamInterval);
+	  } else {
+	      ifaceState.stream = 1;
+	      ifaceState.streamInterval = setInterval(displayImage, 1000);
+	  }
+	  
+      }
+
+      function toggleJoyStickUpdate() {
+	  if(ifaceState.joystick) {
+	      ifaceState.joystick = 0;
+	      clearInterval(ifaceState.joystickInterval);
+	  } else {
+	      ifaceState.joystick = 1;
+	      ifaceState.joystickInterval = setInterval(updateRobotFromJoyStick, 1000);
+	  }
+      }
+
+      // Makes an api call to tell the node server to shut down the Pi
+      function shutDownRobot() {
+	  // Display a pop-up asking if you really want to before doing this
+	  var shutdown = confirm("Are you sure you want to shutdown?");
+	  if(shutdown) {
+	      var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+	      xmlhttp.open("POST", "/api");
+	      xmlhttp.setRequestHeader("Content-Type", "application/json");
+	      xmlhttp.send(JSON.stringify({shutdown:"true"}));
+	  }
       }
 
       function displayImage() {
@@ -66,27 +117,48 @@
     
   </head>
   
-  <body onload="setupJoyStick()">
+  <!-- <body onload="setupJoyStick()">-->
+  <body onload="displayImage()">
     <h1>Explorer</h1>
+
+
+    <!-- It might be fine for this to just be an image instead of a canvas -->
     <div>
       <!-- <video controls width=320 height=240><source src = "/cam/stream.mjpg" type = "video/mjpeg"> </video> -->
       <canvas id="myCanvas" width="640" height="480"></canvas>
-      
-    </div>
-	<div id="joy1Div" style="width:200px;height:200px;margin:50px"></div>
-	<script> var Joy1 = new JoyStick('joy1Div'); </script>
-    <div class="container-fluid">
-      <p><button type="button" onclick="forward()">Forward</button></p>
-      <p>
-	<button type="button" onclick="left()">Left</button>
-	<button type="button" onclick="stop()">Stop</button>
-	<button type="button" onclick="right()">Right</button>
-      </p>
-      <p><button type="button" onclick="backward()">Backward</button></p>
+      <!-- There should be a button directly below the canvas or image which enables or disables live streaming -->
+      <!-- There should be a button somewhere to shut down the robot cleanly -->
+      <!-- Maybe add a debug button to enable/disable the robot api update whenever the joystick changes position -->
     </div>
 
+    <div>
+      <button onclick="toggleLiveCameraStream()">Toggle Stream</button>
+      <button onclick="toggleJoyStickUpdate()">Toggle Joystick</button>
+    </div>
+    
+    <!-- The joystick to control the robot -->
+    <!-- Not happy with a few things: the joystick is jumpy when you first grab it to move it -->
+    <!-- The joystick can get stuck on when you release it -->
+    <div id="joy1Div"></div>
+    <script> var Joy1 = new JoyStick('joy1Div', {width:400, height:400}); </script>
+
+    <!-- I might want to display these buttons only if the joystick is disabled -->
+    <div class="container-fluid">
+      <p><button onclick="forward()">Forward</button></p>
+      <p>
+	<button onclick="left()">Left</button>
+	<button onclick="stop()">Stop</button>
+	<button onclick="right()">Right</button>
+      </p>
+      <p><button onclick="backward()">Backward</button></p>
+    </div>
+
+    <!-- Various things that may or may not be there in the final UI -->
+    <!--  -->
+    <!--  -->
     <div class="container-fluid">
       <a href="status_page.html">status page</a>
+      <button onclick="shutDownRobot()">Shut Down</button>
     </div>
 
   </body>
