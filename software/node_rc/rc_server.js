@@ -93,6 +93,9 @@ const server = http.createServer((req, res) => {
 		if(parsedData.startStream) {
 		    console.log("Starting camera stream");
 		    const cs = spawn('raspistill', ['-vf', '-hf', '-w', '640', '-h', '480', '-o', '/mnt/ramdisk/snapshot.jpg', '-tl', '200', '-t', '600000']);
+		    cs.on('error', (err) => {
+			console.log("Error when trying to spawn raspistill: " + err);
+		    });
 		} else {
 		    console.log("Stopping camera stream");
 		}

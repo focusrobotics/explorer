@@ -77,6 +77,10 @@
 	  } else {
 	      ifaceState.stream = 1;
 	      ifaceState.streamInterval = setInterval(displayImage, 1000);
+	      var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+	      xmlhttp.open("POST", "/cam/api");
+	      xmlhttp.setRequestHeader("Content-Type", "application/json");
+	      xmlhttp.send(JSON.stringify({startStream:1}));
 	  }
 	  
       }
