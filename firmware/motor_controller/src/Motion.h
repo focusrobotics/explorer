@@ -37,7 +37,7 @@
 #ifndef MOTION__H
 #define MOTION__H
 
-#include "Encoder.h" // need to tell the encoder which direction the wheels are turning for simple encoders
+//#include "Encoder.h" // need to tell the encoder which direction the wheels are turning for simple encoders
 #include "Odometry.h" // need to get velocity and acceleration
 #include "MotorPair.h"
 #include <PID_v1.h>
@@ -46,7 +46,8 @@ typedef enum {RIGHT, LEFT, BOTH, OPPOSITE} velocity_setting_t;
 
 class Motion {
  public:
-  Motion(MotorPair* m, Encoder* e, Odometry* o);
+  //Motion(MotorPair* m, Encoder* e, Odometry* o);
+  Motion(MotorPair* m, Odometry* o);
   ~Motion();
   void setup();
   void loop();
@@ -64,7 +65,7 @@ class Motion {
   // This class stores a velocity for right and left wheels, a max acceleration, and 2 PID controllers.
   // Velocity and acceleration for each wheel come from odometry so it also has an odometery class.
   // It does not try to manage absolute position or heading, those are for a higher level to deal with.
-  Encoder* enc;
+  //Encoder* enc;
   Odometry* odom;
   double max_acc;
 

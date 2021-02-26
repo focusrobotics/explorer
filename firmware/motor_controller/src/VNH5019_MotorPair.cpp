@@ -44,19 +44,32 @@ VNH5019_MotorPair::~VNH5019_MotorPair() {}
 
 void VNH5019_MotorPair::setup() {
   //md.init();
+
+  // FIXME pass pins to use in to the constructor
+#ifdef STM32F411xE
   _INA1 = PB12;
   _INB1 = PB13;
   _PWM1 = PA9;
   _INA2 = PB14;
   _INB2 = PB15;
   _PWM2 = PA8;
+  analogWriteFrequency(5000);
+#else
+  _INA1 = 2;
+  _INB1 = 3;
+  _PWM1 = 4;
+  _INA2 = 6;
+  _INB2 = 7;
+  _PWM2 = 8;
+  analogWriteFrequency(_PWM1, 5000);
+  analogWriteFrequency(_PWM2, 5000);
+#endif
   pinMode(_INA1, OUTPUT);
   pinMode(_INB1, OUTPUT);
   pinMode(_PWM1, OUTPUT);
   pinMode(_INA2, OUTPUT);
   pinMode(_INB2, OUTPUT);
   pinMode(_PWM2, OUTPUT);
-  analogWriteFrequency(5000);
   analogWrite(_PWM1, 0);
   analogWrite(_PWM2, 0);
 }

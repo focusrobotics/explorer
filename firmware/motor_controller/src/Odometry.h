@@ -47,7 +47,8 @@
 #ifndef ODOMETRY__H
 #define ODOMETRY__H
 
-#include "Encoder.h"
+#include <Encoder.h>
+#include "MotorPair.h"
 
 typedef struct {
   double x;
@@ -58,7 +59,7 @@ typedef struct {
 class Odometry {
  public:
   // baseline in mm, distance per tick in mm/tick
-  Odometry(Encoder* e, double b, double ldt, double rdt); // pass in robot specific stuff to constructor
+  Odometry(Encoder* re, Encoder* le, double b, double ldt, double rdt); // pass in robot specific stuff to constructor
   ~Odometry();
   void setup();
   void loop();
@@ -80,7 +81,8 @@ class Odometry {
   void set_pose(robot_pose new_pose); // will take a pose struct, cannot fail
 
   // Needs an encoder class to get ticks, specify to robot
-  Encoder* enc;
+  Encoder* renc;
+  Encoder* lenc;
 
   // Need other robot params
   double robot_baseline;

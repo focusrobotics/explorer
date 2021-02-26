@@ -43,8 +43,15 @@
 // Baseline is 147mm
 // From that, calculate 5.2818 mm/tick
 
-Odometry::Odometry(Encoder* e, double b, double rdt, double ldt) {
-  enc = e;
+// Explorer
+// Encoders are
+// Wheel diameter is 98mm
+// Baseline is 320mm
+// xx ticks/mm
+
+Odometry::Odometry(Encoder* re, Encoder* le, double b, double rdt, double ldt) {
+  renc = re;
+  lenc = le;
   robot_baseline = b;
   right_dist_tick = rdt;
   left_dist_tick = ldt;
@@ -66,8 +73,8 @@ void Odometry::loop() {
 
 void Odometry::calc_pose() {
   // get ticks from encoders
-  int curRightTicks = enc->getRightCount();
-  int curLeftTicks = enc->getLeftCount();
+  int curRightTicks = renc->read();
+  int curLeftTicks = lenc->read();
   unsigned long curMillis = millis(); // The call to getRightCount/getLeftCount should also return millis for each for better precision
 
   // calc velocites and accelerations

@@ -61,9 +61,14 @@ Top level for Fetch or Explorer robots
 // My encoder class is really and EncoderPair. There is an Arduino built-in Encoder library I should look at.
 // Quadrature encoders need 2 pins per channel or 4 pins for an encoder pair
 //Encoder enc(3, 2);
+// Switching to PJRC's Encoder library which just works for quadrature encoders and Teensy
+Encoder enc1(3, 4); // encoder for M1 (right wheel)
+Encoder enc2(5, 6); // encoder for M2 (left wheel)
 // Odometry takes an EncoderBase and the baseline of the robot and left and right distance per encoder tick for this robot
 // The current values are for Fetch and will be different for Explorer
 //Odometry odom(&enc, 145, 5.4, 5.4);
+// Encoder ticks per mm: 6533.312 ticks/rev pi*98mm = circumference = 307.8760800136, ticks/mm = 21.2205897896
+Odometry odom(&enc1, &enc2, 320, 21.2206, 21.2206); // baseline measured at 320mm, wheel diameters could be different 
 
 // MotorPair for whatever motor controller this robot has
 // Fetch has AFMS_MOTOR and Explorer uses VNH5019_MOTOR
@@ -106,15 +111,19 @@ void setup() {
 // Main loop
 void loop() {
   jsctl.loop();
-  //if(millis() > (last_millis + 500)) {
-  //  last_millis = millis();
+  if(millis() > (last_millis + 500)) {
+    last_millis = millis();
 
-  //  odom.loop();
-  //  double rvel = odom.get_velocity(RIGHT_MOTOR);
-  //  double lvel = odom.get_velocity(LEFT_MOTOR);
-  //  Serial.print("rv="); Serial.print(rvel); Serial.print(" lv="); Serial.println(lvel);
-  //  enc.printCounts();
-  //}
+    odom.loop();
+    double rvel = odom.get_velocity(RIGHT_MOTOR);
+    double lvel = odom.get_velocity(LEFT_MOTOR);
+    Serial.print("rv="); Serial.print(rvel); Serial.print(" lv="); Serial.println(lvel);
+    int32_t pos1, pos2;
+    pos1 = enc1.read();
+    pos2 = enc2.read();
+    Serial.print("pos1="); Serial.print(pos1); Serial.print("pos2="); Serial.print(pos2); 
+    //enc.printCounts();
+  }
 
 }
 

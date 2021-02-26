@@ -34,18 +34,19 @@
  * 
  ******************************************************************************/
 
-#ifndef ENCODER__H
-#define ENCODER__H
+#ifndef ENCODER_PAIR__H
+#define ENCODER_PAIR__H
 
+#include <stdint.h>
 // get motor_select_t and motor_state_t from MotorPair
 #include "MotorPair.h"
 //typedef enum {RIGHT_MOTOR, LEFT_MOTOR} motor_select_t;
 //typedef enum {MOT_FORWARD, MOT_BACKWARD} motor_state_t;
 
-class Encoder {
+class EncoderPair {
  public:
-  Encoder(uint8_t rIntPin, uint8_t lIntPin);
-  ~Encoder();
+  EncoderPair(uint8_t rIntPin, uint8_t lIntPin);
+  ~EncoderPair();
   void setup();
   void loop(); // doesn't do anything
   void setMotState(motor_state_t rmot, motor_state_t lmot); // only needed for non-quadrature encoders, set by Motion class

@@ -36,12 +36,13 @@
 
 #include "Motion.h"
 
-Motion::Motion(MotorPair* m, Encoder* e, Odometry* o)
+//Motion::Motion(MotorPair* m, Encoder* e, Odometry* o)
+Motion::Motion(MotorPair* m, Odometry* o)
   : lPID(&lMotorVelocity, &lMotorPower, &lMotorRequestedVelocity, 2, 5, 1, DIRECT),
     rPID(&rMotorVelocity, &rMotorPower, &rMotorRequestedVelocity, 2, 5, 1, DIRECT)
 {
   mot = m;
-  enc = e;
+  //enc = e;
   odom = o;
   //rMotor = AFMS.getMotor(1);
   //lMotor = AFMS.getMotor(2);
@@ -60,7 +61,7 @@ void Motion::setup() {
   //rMotor->setSpeed(rMotorPower);
   //lMotor->setSpeed(lMotorPower);
   mot->setup();
-  enc->setup();
+  //enc->setup();
   odom->setup();
 }
 

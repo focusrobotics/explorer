@@ -38,11 +38,11 @@
  * 
  ******************************************************************************/
 
-#include "Encoder.h"
+#include "EncoderPair.h"
 #include <Arduino.h>
 
 // FIXME should pass interrupt pins into the constructor to make this class more general
-Encoder::Encoder(uint8_t rIntPin, uint8_t lIntPin) {
+EncoderPair::EncoderPair(uint8_t rIntPin, uint8_t lIntPin) {
   rightIntPin = rIntPin;
   leftIntPin = lIntPin;
   //lastLeftCount = 0;
@@ -52,10 +52,10 @@ Encoder::Encoder(uint8_t rIntPin, uint8_t lIntPin) {
   //lastUpdateMillis = 0;
 }
 
-Encoder::~Encoder() {
+EncoderPair::~EncoderPair() {
 }
 
-void Encoder::setup() {
+void EncoderPair::setup() {
   // Initialize encoder pins and ISRs
   pinMode(leftIntPin, INPUT);
   attachInterrupt(digitalPinToInterrupt(leftIntPin), leftEncoderISR, CHANGE);
@@ -63,7 +63,7 @@ void Encoder::setup() {
   attachInterrupt(digitalPinToInterrupt(rightIntPin), rightEncoderISR, CHANGE);
 }
 
-void Encoder::loop() {
+void EncoderPair::loop() {
   // Update position and velocity and acceleration if counts have changed, or sufficient time has passed
   // Maybe only update position and heading
   
@@ -95,22 +95,22 @@ void Encoder::loop() {
   //  }
 }
 
-void Encoder::setMotState(motor_state_t rmot, motor_state_t lmot) {
-  Encoder::rightMotState = rmot;
-  Encoder::leftMotState = lmot;
+void EncoderPair::setMotState(motor_state_t rmot, motor_state_t lmot) {
+  EncoderPair::rightMotState = rmot;
+  EncoderPair::leftMotState = lmot;
 }
 
-void Encoder::printCounts() {
+void EncoderPair::printCounts() {
   Serial.print(rightCount);
   Serial.print(", ");
   Serial.println(leftCount);
 }
 
-int Encoder::getLeftCount() {
+int EncoderPair::getLeftCount() {
   return leftCount;
 }
 
-int Encoder::getRightCount() {
+int EncoderPair::getRightCount() {
   return rightCount;
 }
 
@@ -119,30 +119,30 @@ int Encoder::getRightCount() {
 // ******************************************************************************** //
 
 // Static variables used by the ISRs
-unsigned int Encoder::leftCount = 0;
-unsigned int Encoder::rightCount = 0;
-//unsigned long Encoder::leftCountMillis = 0; // Tracking millis was to improve accuracy for velocity and acceleration in odometry. May or may not really need it.
-//unsigned long Encoder::rightCountMillis = 0;
-motor_state_t Encoder::rightMotState = MOT_FORWARD;
-motor_state_t Encoder::leftMotState = MOT_FORWARD;
+unsigned int EncoderPair::leftCount = 0;
+unsigned int EncoderPair::rightCount = 0;
+//unsigned long EncoderPair::leftCountMillis = 0; // Tracking millis was to improve accuracy for velocity and acceleration in odometry. May or may not really need it.
+//unsigned long EncoderPair::rightCountMillis = 0;
+motor_state_t EncoderPair::rightMotState = MOT_FORWARD;
+motor_state_t EncoderPair::leftMotState = MOT_FORWARD;
 
 // Interrupt service routines for encoders
 void leftEncoderISR() {
-  if(Encoder::leftMotState == MOT_BACKWARD) {
-    Encoder::leftCount--; // inc or dec depending on motor dir
+  if(EncoderPair::leftMotState == MOT_BACKWARD) {
+    EncoderPair::leftCount--; // inc or dec depending on motor dir
   } else {
-    Encoder::leftCount++; // inc or dec depending on motor dir
+    EncoderPair::leftCount++; // inc or dec depending on motor dir
   }
-  //Encoder::leftCountMillis = millis(); // get the exact millis at the interrupt time for better accuracy when computing velocity
+  //EncoderPair::leftCountMillis = millis(); // get the exact millis at the interrupt time for better accuracy when computing velocity
 }
 
 void rightEncoderISR() {
-  if(Encoder::rightMotState == MOT_BACKWARD) {
-    Encoder::rightCount--; // inc or dec depending on motor dir
+  if(EncoderPair::rightMotState == MOT_BACKWARD) {
+    EncoderPair::rightCount--; // inc or dec depending on motor dir
   } else {
-    Encoder::rightCount++; // inc or dec depending on motor dir
+    EncoderPair::rightCount++; // inc or dec depending on motor dir
   }
-  //Encoder::rightCountMillis = millis(); // get the exact millis at the interrupt time for better accuracy when computing velocity
+  //EncoderPair::rightCountMillis = millis(); // get the exact millis at the interrupt time for better accuracy when computing velocity
 }
 
 
