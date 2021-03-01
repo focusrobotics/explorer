@@ -54,6 +54,7 @@ Top level for Fetch or Explorer robots
 #include "Encoder.h"
 #include "Odometry.h"
 #include "Motion.h"
+#include "RPManualMotion.h"
 
 
 // Define constants for the interrupt pins used by the encoder and the type of encoder
@@ -62,13 +63,13 @@ Top level for Fetch or Explorer robots
 // Quadrature encoders need 2 pins per channel or 4 pins for an encoder pair
 //Encoder enc(3, 2);
 // Switching to PJRC's Encoder library which just works for quadrature encoders and Teensy
-Encoder enc1(3, 4); // encoder for M1 (right wheel)
-Encoder enc2(5, 6); // encoder for M2 (left wheel)
+Encoder enc1(10, 9); // encoder for M1 (left wheel)
+Encoder enc2(12, 11); // encoder for M2 (right wheel)
 // Odometry takes an EncoderBase and the baseline of the robot and left and right distance per encoder tick for this robot
 // The current values are for Fetch and will be different for Explorer
 //Odometry odom(&enc, 145, 5.4, 5.4);
-// Encoder ticks per mm: 6533.312 ticks/rev pi*98mm = circumference = 307.8760800136, ticks/mm = 21.2205897896
-Odometry odom(&enc1, &enc2, 320, 21.2206, 21.2206); // baseline measured at 320mm, wheel diameters could be different 
+// Encoder ticks per mm: 6533.312 ticks/rev pi*98mm = circumference = 307.8760800136, ticks/mm = 21.2205897896, mm/tick = .047124
+Odometry odom(&enc2, &enc1, 320, 0.047124, 0.047124); // baseline measured at 320mm, wheel diameters could be different 
 
 // MotorPair for whatever motor controller this robot has
 // Fetch has AFMS_MOTOR and Explorer uses VNH5019_MOTOR
@@ -84,15 +85,18 @@ VNH5019_MotorPair mot;
 
 // The motion class will need to be extended based on the motor controller type. AFMS for this robot but VHN*** for explorer
 // There will need to be a MotionBase class and then various extended classes for different configurations
-//Motion motion(&mot, &enc, &odom);
+Motion motion(&mot, &odom);
 // RPManual depends on the motor controller to allow joystick control of motor power
 // RPMotion would use a MotionBase
 RPManual rpman(&mot);
+RPManualMotion rpmm(&motion);
+
 //JoystickCtl jsctl;
 JsonCtl jsctl(Serial);
 // Other RP classes would not be joystick controlled, but might be kicked off with button presses from the joystick or activated from
 // other Ctl classes like RasPiCtl or SerialCtl or something like that.
-unsigned long last_millis;
+unsigned long last_odom_print;
+unsigned long last_jsctl;
 
 void setup() {
   // Initialize serial port for debug
@@ -101,28 +105,33 @@ void setup() {
   Serial.begin(115200);
   mot.setup();
   rpman.setup();
+  rpmm.setup();
   jsctl.setup();
-  jsctl.register_test(&rpman);  // register rpman with jsctl
+  jsctl.register_test(&rpmm);  // register rpman with jsctl
 
-  last_millis = millis();
-  //enc.setup();
+  last_odom_print = millis();
+  last_jsctl = millis();
 }
 
 // Main loop
 void loop() {
-  jsctl.loop();
-  if(millis() > (last_millis + 500)) {
-    last_millis = millis();
+  if(millis() > (last_jsctl + 50)) {
+    last_jsctl = millis();
+    jsctl.loop();
+  }
+  if(millis() > (last_odom_print + 500)) {
+    last_odom_print = millis();
 
-    odom.loop();
+    //odom.loop();
     double rvel = odom.get_velocity(RIGHT_MOTOR);
     double lvel = odom.get_velocity(LEFT_MOTOR);
-    Serial.print("rv="); Serial.print(rvel); Serial.print(" lv="); Serial.println(lvel);
-    int32_t pos1, pos2;
-    pos1 = enc1.read();
-    pos2 = enc2.read();
-    Serial.print("pos1="); Serial.print(pos1); Serial.print("pos2="); Serial.print(pos2); 
-    //enc.printCounts();
+    robot_pose p = odom.get_pose();
+    int32_t pos1 = enc1.read();
+    int32_t pos2 = enc2.read();
+
+    Serial.print("pos1="); Serial.print(pos1); Serial.print(" pos2="); Serial.print(pos2); 
+    Serial.print(" rv="); Serial.print(rvel); Serial.print(" lv="); Serial.print(lvel);
+    Serial.print(" x="); Serial.print(p.x); Serial.print(" y="); Serial.print(p.y); Serial.print(" heading="); Serial.println(p.heading); 
   }
 
 }

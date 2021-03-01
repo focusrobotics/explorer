@@ -37,7 +37,6 @@
 #ifndef MOTION__H
 #define MOTION__H
 
-//#include "Encoder.h" // need to tell the encoder which direction the wheels are turning for simple encoders
 #include "Odometry.h" // need to get velocity and acceleration
 #include "MotorPair.h"
 #include <PID_v1.h>
@@ -46,7 +45,6 @@ typedef enum {RIGHT, LEFT, BOTH, OPPOSITE} velocity_setting_t;
 
 class Motion {
  public:
-  //Motion(MotorPair* m, Encoder* e, Odometry* o);
   Motion(MotorPair* m, Odometry* o);
   ~Motion();
   void setup();
@@ -58,26 +56,23 @@ class Motion {
   // This doesn't allow arcs of movement, but is simpler in some ways
   // A PID controller will be used to keep the velocities correct
   // Once the velocity is set, regular calls to loop() will keep adjustments going
-  // Maybe send an enum with the velocity which is LEFT, RIGHT, BOTH, or OPPOSITE and default to BOTH
+  // Use an enum with the velocity which is LEFT, RIGHT, BOTH, or OPPOSITE and default to BOTH
   void set_velocity(double v, velocity_setting_t t);
   void set_acceleration(double a); // maximum accel as robot gets up (or down) to new velocity
 
   // This class stores a velocity for right and left wheels, a max acceleration, and 2 PID controllers.
   // Velocity and acceleration for each wheel come from odometry so it also has an odometery class.
   // It does not try to manage absolute position or heading, those are for a higher level to deal with.
-  //Encoder* enc;
   Odometry* odom;
   double max_acc;
 
   // Classes and variables to access the motor and store its current state
-  //Adafruit_MotorShield AFMS;
-  //Adafruit_DCMotor *rMotor;
-  //Adafruit_DCMotor *lMotor;
   MotorPair* mot;
   double lMotorPower;
   double rMotorPower;
   char lMotorState;
   char rMotorState;
+  uint16_t lmp, plmp, rmp, prmp;
 
   double lMotorVelocity;
   double lMotorRequestedVelocity;

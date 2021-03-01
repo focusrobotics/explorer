@@ -37,6 +37,8 @@
 #include "Odometry.h"
 // Need Arduino.h for the millis() function to get relative times
 #include <Arduino.h>
+#include <math.h>
+
 // Fetch
 // Encoders are 40 ticks per rev
 // Wheel diameter is 67.25mm
@@ -44,10 +46,11 @@
 // From that, calculate 5.2818 mm/tick
 
 // Explorer
-// Encoders are
-// Wheel diameter is 98mm
+// Encoders are 6533.312 ticks per rev
+// Wheel diameter is 98mm, circ is 307.876mm
 // Baseline is 320mm
-// xx ticks/mm
+// 21.2206 ticks/mm
+// .047124 mm/tick
 
 Odometry::Odometry(Encoder* re, Encoder* le, double b, double rdt, double ldt) {
   renc = re;
@@ -98,8 +101,12 @@ void Odometry::calc_pose() {
   // calc new position and heading
   // distance traveled is the average of the left and right wheel
   double incrDist = (rightIncrDist + leftIncrDist) / 2;
-  // FIXME: calculate new pose; new heading and new x and y position
-  
+  double deltaRotRad = (rightIncrDist - leftIncrDist) / robot_baseline;
+  pose.heading += deltaRotRad;
+  if(pose.heading > 2.0 * PI) { pose.heading -= 2.0 * PI; }
+  if(pose.heading < 0.0) { pose.heading += 2.0 * PI; }
+  pose.x += incrDist * cos(pose.heading);
+  pose.y += incrDist * sin(pose.heading);
 }
 
 robot_pose Odometry::get_pose() {

@@ -36,18 +36,14 @@
 
 #include "Motion.h"
 
-//Motion::Motion(MotorPair* m, Encoder* e, Odometry* o)
 Motion::Motion(MotorPair* m, Odometry* o)
-  : lPID(&lMotorVelocity, &lMotorPower, &lMotorRequestedVelocity, 2, 5, 1, DIRECT),
-    rPID(&rMotorVelocity, &rMotorPower, &rMotorRequestedVelocity, 2, 5, 1, DIRECT)
+  : lPID(&lMotorVelocity, &lMotorPower, &lMotorRequestedVelocity, 4000, 10000, 0, DIRECT),
+    rPID(&rMotorVelocity, &rMotorPower, &rMotorRequestedVelocity, 4000, 10000, 0, DIRECT)
 {
   mot = m;
-  //enc = e;
   odom = o;
-  //rMotor = AFMS.getMotor(1);
-  //lMotor = AFMS.getMotor(2);
-  lMotorPower = 100;
-  rMotorPower = 108;
+  lMotorPower = 0;
+  rMotorPower = 0;
   lMotorState = 0;
   rMotorState = 0;
 }
@@ -55,36 +51,41 @@ Motion::~Motion() {}
 
 void Motion::setup() {
   // Initialize motors
-  //AFMS.begin();  // create with the default frequency 1.6KHz
-  //rMotor->run(RELEASE);
-  //lMotor->run(RELEASE);
-  //rMotor->setSpeed(rMotorPower);
-  //lMotor->setSpeed(lMotorPower);
   mot->setup();
-  //enc->setup();
   odom->setup();
+  rPID.SetOutputLimits(0,1023);
+  lPID.SetOutputLimits(0,1023);
+  rPID.SetMode(AUTOMATIC);
+  lPID.SetMode(AUTOMATIC);
 }
 
 void Motion::loop() {    
-  // Call loop() on the Encoder class to update position and velocity, etc.
-  // Not necessary... enc just counts ticks and is driven by interrupts
-  //enc->loop();
-
   // Call loop() on the Odometry class to update velocity and acceleration
   // Get the computed velocities and accelerations to use here
   odom->loop();
   rMotorVelocity = odom->get_velocity(RIGHT_MOTOR);
   lMotorVelocity = odom->get_velocity(LEFT_MOTOR);
+  //Serial.print("rreqVel="); Serial.print(rMotorRequestedVelocity);
+  //Serial.print(" rvel="); Serial.print(rMotorVelocity);
+  //Serial.print(" lreqVel="); Serial.print(lMotorRequestedVelocity);
+  //Serial.print(" lvel="); Serial.print(lMotorVelocity);
   
   // Call compute() on the PID controllers to compute motor power based on actual velocity and requested velocity for each motor
   lPID.Compute();
   rPID.Compute();
 
-  //rMotor->setSpeed(rMotorPower);
-  //lMotor->setSpeed(lMotorPower);
-
-  mot->set_speed(RIGHT_MOTOR, rMotorPower);
-  mot->set_speed(LEFT_MOTOR, lMotorPower);
+  // Set the motor power values to what the PID controller computed
+  rmp = rMotorPower;
+  lmp = lMotorPower;
+  //Serial.print(" rmp="); Serial.print(rMotorPower); Serial.print(" lmp="); Serial.println(lMotorPower); 
+  if(rmp != prmp) {
+    mot->set_speed(RIGHT_MOTOR, rmp);
+    prmp = rmp;
+  }
+  if(lmp != plmp) {
+    mot->set_speed(LEFT_MOTOR, lmp);
+    plmp = lmp;
+  }
 }
 
 // When setting velocity, if the velocity is >0 for any wheel, set the motor direction forward and tell the encoder we are moving forward
@@ -96,21 +97,17 @@ void Motion::set_velocity(double v, velocity_setting_t t) {
   switch(t) {
   case RIGHT:
     rMotorRequestedVelocity = v;
-    //enc.setMotState(); // FIXME or should this be called in loop() where we set motor speed? Need to be able to set motor direction individually
     break;
   case LEFT:
     lMotorRequestedVelocity = v;
-    //enc.setMotState(); // FIXME
     break;
   case BOTH:
     rMotorRequestedVelocity = v;
     lMotorRequestedVelocity = v;
-    //enc.setMotState(); // FIXME
     break;
   case OPPOSITE:
     rMotorRequestedVelocity = v;
     lMotorRequestedVelocity = -v;
-    //enc.setMotState(); // FIXME
     break;
   }
 }

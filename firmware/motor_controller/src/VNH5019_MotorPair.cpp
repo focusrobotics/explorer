@@ -82,19 +82,19 @@ void VNH5019_MotorPair::set_speed(motor_select_t mot, int16_t speed) {
       digitalWrite(_INA1, HIGH);
       digitalWrite(_INB1, LOW);
       analogWrite(_PWM1, pow);
-      Serial.print("Set m1 fwd with pwr ");
+      //Serial.print("Set m1 fwd with pwr ");
 
     } else if(speed<0) { // counterclockwise for negative speed
       digitalWrite(_INA1, LOW);
       digitalWrite(_INB1, HIGH);
       analogWrite(_PWM1, pow);
-      Serial.print("Set m1 rev with pwr ");
+      //Serial.print("Set m1 rev with pwr ");
 
     } else { // speed == 0
       digitalWrite(_INA1, LOW);
       digitalWrite(_INB1, LOW);
       analogWrite(_PWM1, pow);
-      Serial.print("Set m1 stopped with pwr ");
+      //Serial.print("Set m1 stopped with pwr ");
 
     }
   } else {
@@ -102,23 +102,23 @@ void VNH5019_MotorPair::set_speed(motor_select_t mot, int16_t speed) {
       digitalWrite(_INA2, HIGH);
       digitalWrite(_INB2, LOW);
       analogWrite(_PWM2, pow);
-      Serial.print("Set m2 fwd with pwr ");
+      //Serial.print("Set m2 fwd with pwr ");
 
     } else if(speed<0) { // counterclockwise for negative speed
       digitalWrite(_INA2, LOW);
       digitalWrite(_INB2, HIGH);
       analogWrite(_PWM2, pow);
-      Serial.print("Set m2 rev with pwr ");
+      //Serial.print("Set m2 rev with pwr ");
 
     } else { // speed == 0
       digitalWrite(_INA2, LOW);
       digitalWrite(_INB2, LOW);
       analogWrite(_PWM2, pow);
-      Serial.print("Set m2 stopped with pwr ");
+      //Serial.print("Set m2 stopped with pwr ");
 
     }
   }
-  Serial.println(pow);
+  //Serial.println(pow);
 }
 
 #endif

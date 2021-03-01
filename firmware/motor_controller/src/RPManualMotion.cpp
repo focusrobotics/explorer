@@ -52,7 +52,7 @@ void RPManualMotion::status() {
 }
 
 // The joystick range is +/-100 in x and y
-// The velocity range is +/- 0.6m/s for a straight line for Fetch
+// The velocity range is +/- 0.6m/s for a straight line for Fetch or Explorer
 // The allowable angular range is ???
 // There should be a small dead zone in the center of the joystick, say +/-10
 // The robot only goes straight or rotates with this setup, no arcs are supported
@@ -67,30 +67,4 @@ void RPManualMotion::loop(rpctl_info* ctl) {
   }
   mot->loop();
   
-  //if(ctl->joyy > 10) {
-    //    rMotor->run(FORWARD);
-    //lMotor->run(FORWARD);
-    //rMotor->setSpeed(ctl->joyy * 2); // joystick gives -100 to +100 so this give most of the range of +/-255 for the motor controller but not all
-    //lMotor->setSpeed(ctl->joyy * 2);
-  //} else if(ctl->joyy < -10) {
-    //rMotor->run(BACKWARD);
-    //lMotor->run(BACKWARD);
-    //rMotor->setSpeed(ctl->joyy * -2);
-    //lMotor->setSpeed(ctl->joyy * -2);
-  //} else {
-  // if(ctl->joyx > 10) {
-      //rMotor->run(BACKWARD);
-      //lMotor->run(FORWARD);
-      //rMotor->setSpeed(ctl->joyx * 2);
-      //lMotor->setSpeed(ctl->joyx * 2);
-  //} else if(ctl->joyx < -10) {
-      //rMotor->run(FORWARD);
-      //lMotor->run(BACKWARD);
-      //rMotor->setSpeed(ctl->joyx * -2);
-      //lMotor->setSpeed(ctl->joyx * -2);
-  //} else {
-      //rMotor->run(RELEASE);
-      //lMotor->run(RELEASE);
-  //  }
-  //}
 }

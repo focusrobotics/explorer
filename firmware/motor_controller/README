@@ -1,0 +1,4 @@
+pio run
+pio run -e teensy (to run a non-default build)
+pio run -t upload (to upload)
+pio run -t clean
