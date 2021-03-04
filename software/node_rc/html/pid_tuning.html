@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=0">
+
+    <style>
+      h1,a,div {
+	  text-align: center;
+      }
+      canvas {
+	  display: block;
+	  margin-left: auto;
+	  margin-right: auto;
+      }
+    </style>
+    
+    <title>Explorer Robot PID Tuning</title>
+
+    <script type="text/javascript">
+      // Will need a struct which keeps track of parameters: velocities for each wheel and PID constants
+      // Will need to also keep track of the min/max for each parameter since I want adjustable ranges
+      // Need a function to draw the sliders for all parameters and current positions
+      // Need listener functions for mousedown and up and state to handle dragging sliders and updating params based on the drag
+      // Need a function to send the current parameters to the API when they change
+      var tunState = {
+	  rVel:0, lVel:0,
+	  Kp:0, Ki:0, Kd:0,
+	  minVel:0, maxVel:0.5, maxKp:1000, maxKi:1000, maxKd:1000,
+	  // top and bottom are the same for all controls, must track horizontal location and slider position for each control
+	  ctls: {bot:400, top:80, drag:0, dragnum:0,
+		 locs:[{hpos:120, knob:0}, {hpos:200, knob:120}, {hpos:360, knob:0}, {hpos:440, knob:0}, {hpos:520, knob:0}]}
+      };
+
+      function drawControls() {
+	  var canvas = document.getElementById("pidControls"); // FIXME: get these once and save them
+	  var ctx = canvas.getContext("2d");
+	  // start by clearing the canvas
+	  ctx.clearRect(0, 0, 640, 480);
+	  ctx.fillStyle = "#000000";
+	  // draw full border, but do this with css properties later
+	  ctx.moveTo(0,0);
+	  ctx.lineTo(640,0);
+	  ctx.lineTo(640,480);
+	  ctx.lineTo(0,480);
+	  ctx.lineTo(0,0);
+	  ctx.stroke();
+
+	  // five sliders, approx every 80px with 120px border on either side
+	  // slider height would be 400 with 40 top and bottom border
+	  // I should keep the coordinates in a struct and iterate through them
+	  // 120,440 -> 120,40; 200,440; 280,440xxx; 360,440; 440,440; 520,440
+	  // if the slider is 320 high I could add hash marks every 32 but that would give 11 hashes not 10; but that's what I want
+
+	  let vTop = tunState.ctls.top;
+	  let vBot = tunState.ctls.bot;
+	  for (let h of tunState.ctls.locs) {
+	      ctx.moveTo(h.hpos, vBot);
+	      ctx.lineTo(h.hpos, vTop);
+	      ctx.stroke();
+	      ctx.fillRect(h.hpos-16, vBot-h.knob-4, 32, 8);
+	  }
+	  canvas.addEventListener("mousedown", mdown);
+	  canvas.addEventListener("mousemove", mmove);
+	  canvas.addEventListener("mouseup", mup);
+      }
+
+      // I'll want to deal with mouse-down, mouse-up, and mouse-move events
+      // I'll care about a mouse-down within the bounding box of any slider knob, a mouse-up anywhere on the page if my slider is moving,
+      // and a mouse-move if my slider is moving. The mouse-up will calculate the new values and call sendParams()
+      function mdown(event) {
+	  //alert("mousedown event! " + event.offsetX + " " + event.offsetY);
+	  if(event.offsetX > tunState.ctls.locs[0].hpos-16 && event.offsetX < tunState.ctls.locs[0].hpos+16 &&
+	    event.offsetY > tunState.ctls.bot - tunState.ctls.locs[0].knob - 4 && event.offsetY < tunState.ctls.bot - tunState.ctls.locs[0].knob + 4) {
+	      tunState.ctls.drag = 1;
+	      tunState.ctls.dragnum = 0;
+	      console.log("Started drag");
+	      // instead of drawing once here, set up an interval to draw 20 times a second until the drag ends, only if a drag is started
+	  }
+	  //drawControls();
+      }
+
+      function mup(event) {
+	  tunState.ctls.drag = 0;
+	  console.log("Ended drag");
+	  drawControls();
+      }
+
+      function mmove(event) {
+	  if(tunState.ctls.drag) {
+	      tunState.ctls.locs[tunState.ctls.dragnum].knob -= event.movementY;
+	      console.log("moved " + tunState.ctls.locs[tunState.ctls.dragnum].knob);
+	      if(tunState.ctls.locs[tunState.ctls.dragnum].knob < 0) { tunState.ctls.locs[tunState.ctls.dragnum].knob = 0; }
+	      if(tunState.ctls.locs[tunState.ctls.dragnum].knob > 320) { tunState.ctls.locs[tunState.ctls.dragnum].knob = 320; }
+	      //drawControls(); Don't redraw for every move, it can just be too many draws and get jumpy
+	      // instead, just record the positions here and redraw 20 times a second or so with an interval set up
+	      // at the start of the drag and disabled at the end of the drag
+	  }
+      }
+
+      function mleave(event) {
+	  tunState.ctls.drag = 0;
+	  console.log("Left canvas which ended drag");
+	  drawControls();
+      }
+
+      function sendParams() {
+      }
+      
+    </script>
+
+  </head>
+
+  <!-- This will really call initControls() onload which will set some stuff up and then call drawControls() for the first time and -->
+  <!-- set up the mouse events. After that drawControls() will only be called as a result of mouse events. -->
+  <!-- There will also be a section below the controls which shows (and possibly graphs) requested and actual velocity over time. -->
+  <!-- That section will simply be updated on an interval or as data arrives over the websocket -->
+  <body onload="drawControls()">
+    <h1>PID Tuning</h1>
+    <canvas id="pidControls" width="640" height="480"></canvas>
+    <!--  -->
+    <!--  -->
+    <!--  -->
+  </body>
+</html>

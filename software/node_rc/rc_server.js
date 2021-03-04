@@ -46,6 +46,8 @@ if(process.env.HOSTNAME != "explorer") {
     poweroffCommand = 'echo';
 }
 
+var liveStreamEnabled = 0;
+
 // Don't create the response at all until req.url is considered
 // if req.url starts with /api then pass it to the robot api object which will respond with json
 // if req.url starts with /video (maybe /camera or /cam is better) then pass it to the streaming class
@@ -88,13 +90,21 @@ const server = http.createServer((req, res) => {
 	    req.on('end', () => {
 		let parsedData = JSON.parse(rawData)
 		console.log("Got this data from the camera API: " + rawData);
-		// FIXME: add startStream option so that the raspistill program is only started when requested
+		// startStream option so that the raspistill program is only started when requested
 		// The client needs to send {startStream:1} to start the raspistill subprocess and {startStream:0} to stop it
-		if(parsedData.startStream) {
+		if(parsedData.startStream && !liveStreamEnabled) {
 		    console.log("Starting camera stream");
+		    // Only spawn a raspistill process if there isn't one running!
+		    // The status of raspistill is tracked here with the liveStreamEnabled variable
+		    liveStreamEnabled = 1;
 		    const cs = spawn('raspistill', ['-vf', '-hf', '-w', '640', '-h', '480', '-o', '/mnt/ramdisk/snapshot.jpg', '-tl', '100', '-t', '600000']);
 		    cs.on('error', (err) => {
+			liveStreamEnabled = 0;
 			console.log("Error when trying to spawn raspistill: " + err);
+		    });
+		    cs.on('exit', (code, signal) => {
+			liveStreamEnabled = 0;
+			console.log("raspistill exited with code: " + code);
 		    });
 		} else {
 		    console.log("Stopping camera stream");
@@ -105,7 +115,9 @@ const server = http.createServer((req, res) => {
 	} else if(req.method=='GET') {
 	    res.statusCode = 200;
 	    res.setHeader('Content-Type', 'application/json');
-	    let mydata = {livestream:liveImages, serial:useSerial}
+	    // return whether the stream is started on the server
+	    // client start and stop of the stream is different than the server start and stop stream; both are currently independent
+	    let mydata = {configLivestream:liveImages, configSerial:useSerial, raspistill:liveStreamEnabled}
 	    res.write(JSON.stringify(mydata));
 	    res.end();
 	} else {
@@ -135,7 +147,7 @@ const server = http.createServer((req, res) => {
 	    })
 	    req.on('end', () => {
 		let parsedData = JSON.parse(rawData)
-		// FIXME: if the parsedData includes shutdown:true then call poweroff for the raspi!
+		// If the parsedData includes shutdown:true then call poweroff for the raspi!
 		console.log(parsedData);
 		if(parsedData.shutdown == 'true') {
 		    console.log("Shut down now!");
@@ -167,7 +179,7 @@ const server = http.createServer((req, res) => {
 	} else if(req.method=='GET') {
 	    res.statusCode = 200;
 	    res.setHeader('Content-Type', 'application/json');
-	    let mydata = {enc0:5978, enc1:2345, vel:0.3487}
+	    let mydata = {enc1:5978, enc2:2345, vel1:0.3487, vel2:0.345}
 	    res.write(JSON.stringify(mydata));
 	    //res.write(req.url);
 	    res.end();
@@ -220,14 +232,8 @@ server.listen(port, () => {
     console.log(`Server running at port ${port}`);
 })
 
-//sp.on('readable', function () {
-//    console.log('Data:', sp.read())
-//})
-
-//sp.on('data', function (data) {
-//  console.log('Data:', data)
-//})
-
+// Parse serial data from the uc as JSON and keep track of the values to return via the API when requested
+// Probably send it to the client via websockets when I get that set up
 if(useSerial) {
     const lines = sp.pipe(new Readline())
     lines.on('data', console.log)

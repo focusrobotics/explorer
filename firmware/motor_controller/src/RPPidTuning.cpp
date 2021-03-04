@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2019 by Focus Robotics. All rights reserved.
+ * Copyright (c) 2021 by Focus Robotics
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@
  * SOFTWARE.
  *
  * Created By   :  Andrew Worcester
- * Creation_Date:  Sun Nov 24 2019
+ * Creation_Date:  Wed Mar  3 2021
  * 
  * Brief Description:
  * 
@@ -34,33 +34,37 @@
  * 
  ******************************************************************************/
 
-#ifndef RPBASE__H
-#define RPBASE__H
+#include "RPPidTuning.h"
+#include <Arduino.h>
+RPPidTuning::RPPidTuning(Motion* m) {
+  mot = m;
+}
 
-#include <stdint.h>
+RPPidTuning::~RPPidTuning() {
+}
 
-typedef struct {
-  uint8_t pgm; // program select, only for the controller
-  int8_t jsx;  // joystick x axis +/-127
-  int8_t jsy;  // joystick y axis +/-127
-  uint8_t bt0; // 8 button values
-  // how do I represent velocities? float or fixed point value?
-  // one digit of whole number plus 3 digits of fraction would always be more than enough, so 16 bit fixed would work
-  // 16 bit values could be velocity or motor power; should I reuse the same entries or have both?
-  uint16_t velR;
-  uint16_t velL;
-  uint32_t Kp; // PID constants for PID tuning
-  uint32_t Ki;
-  uint32_t Kd;
-  // I want some controls to turn messages on and off and control debug and info level
-} rpctl_info;
+void RPPidTuning::setup() {
+  mot->setup();
+}
 
-class RPBase {
- public:
-  RPBase();
-  virtual ~RPBase();
-  virtual void setup();
-  virtual void status();
-  virtual void loop(rpctl_info* ctl);
-};
-#endif
+void RPPidTuning::status() {
+  Serial.print("RPPidTuning Status\n");
+}
+
+// The joystick range is +/-100 in x and y
+// The velocity range is +/- 0.6m/s for a straight line for Fetch or Explorer
+// The allowable angular range is ???
+// There should be a small dead zone in the center of the joystick, say +/-10
+// The robot only goes straight or rotates with this setup, no arcs are supported
+void RPPidTuning::loop(rpctl_info* ctl) {
+  //Serial.print("Running rpman loop\n");
+  if(ctl->jsy > 10 || ctl->jsy < -10) {
+    mot->set_velocity((ctl->jsy*0.006), BOTH);
+  } else if(ctl->jsx > 10 || ctl->jsy < -10) {
+    mot->set_velocity((ctl->jsx*0.006), OPPOSITE);
+  } else {
+    mot->set_velocity(0, BOTH);
+  }
+  mot->loop();
+  
+}
