@@ -50,15 +50,11 @@ class Motion {
   void setup();
   void loop();
 
-  // I think that initially I can just say that velocity of the wheels is always equal
-  // Equal in the same direction for forward, backward motion
-  // Equal in opposite directions for rotation clockwise or counterclockwise
-  // This doesn't allow arcs of movement, but is simpler in some ways
-  // A PID controller will be used to keep the velocities correct
-  // Once the velocity is set, regular calls to loop() will keep adjustments going
-  // Use an enum with the velocity which is LEFT, RIGHT, BOTH, or OPPOSITE and default to BOTH
+  // Once the velocity is set, regular calls to loop() will keep updating the PID controller
+  // Use an enum with the velocity which is LEFT, RIGHT, BOTH, or OPPOSITE (for rotating in place)
   void set_velocity(double v, velocity_setting_t t);
-  void set_acceleration(double a); // maximum accel as robot gets up (or down) to new velocity
+  void set_acceleration(double a); // maximum accel as robot gets up (or down) to new velocity (this doesn't do anything yet)
+  void set_pid_constants(uint32_t Kp, uint32_t Ki, uint32_t Kd);
 
   // This class stores a velocity for right and left wheels, a max acceleration, and 2 PID controllers.
   // Velocity and acceleration for each wheel come from odometry so it also has an odometery class.

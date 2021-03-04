@@ -122,7 +122,7 @@ void JsonCtl::process_input_char(char c) {
 }
 
 void JsonCtl::update_ctl_struct() {
-  int16_t valn = val_string_to_num();
+  int32_t valn = val_string_to_num();
   if(name[0]=='j' && name[1]=='s' && name[2]=='x' && name[3]==0) {
     ctlinfo.jsx = valn;
     ser.print("jsx set to ");
@@ -135,6 +135,16 @@ void JsonCtl::update_ctl_struct() {
     ctlinfo.bt0 = valn;
     ser.print("bt0 set to ");
     ser.println(valn);
+  } else if(name[0]=='v' && name[1]=='e' && name[2]=='l' && name[3]=='r' && name[4]==0) {
+    ctlinfo.velR = valn;
+  } else if(name[0]=='v' && name[1]=='e' && name[2]=='l' && name[3]=='l' && name[4]==0) {
+    ctlinfo.velL = valn;
+  } else if(name[0]=='k' && name[1]=='p' && name[2]==0) {
+    ctlinfo.Kp = valn;
+  } else if(name[0]=='k' && name[1]=='i' && name[2]==0) {
+    ctlinfo.Ki = valn;
+  } else if(name[0]=='k' && name[1]=='d' && name[2]==0) {
+    ctlinfo.Kd = valn;
   }
 }
 
@@ -158,9 +168,9 @@ bool is_numeric(char c) {
 // since this can be 1 or 2 or 3 or 4 ascii chars, need to reorg the data first
 // loop from the end to find the first non-null char and that is the 1's place to save it in the accum
 // I actually have the number of chars so I could skip searching for nulls and just start processing at val[val_char_count-1]
-int16_t JsonCtl::val_string_to_num() {
-  int place_value_mult = 1;
-  int accum_val = 0;
+int32_t JsonCtl::val_string_to_num() {
+  int32_t place_value_mult = 1;
+  int32_t accum_val = 0;
   //ser.print("tonum ");
   //ser.print(val_char_count);
   for(int i=val_char_count; i>0; i--) {

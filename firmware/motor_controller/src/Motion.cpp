@@ -115,3 +115,8 @@ void Motion::set_velocity(double v, velocity_setting_t t) {
 void Motion::set_acceleration(double a) {
   max_acc = a;
 }
+
+void Motion::set_pid_constants(uint32_t Kp, uint32_t Ki, uint32_t Kd) {
+  lPID.SetTunings(Kp, Ki, Kd);
+  rPID.SetTunings(Kp, Ki, Kd);
+}
