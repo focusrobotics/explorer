@@ -51,20 +51,25 @@ void RPPidTuning::status() {
   Serial.print("RPPidTuning Status\n");
 }
 
-// The joystick range is +/-100 in x and y
-// The velocity range is +/- 0.6m/s for a straight line for Fetch or Explorer
-// The allowable angular range is ???
-// There should be a small dead zone in the center of the joystick, say +/-10
-// The robot only goes straight or rotates with this setup, no arcs are supported
 void RPPidTuning::loop(rpctl_info* ctl) {
   //Serial.print("Running rpman loop\n");
-  if(ctl->jsy > 10 || ctl->jsy < -10) {
-    mot->set_velocity((ctl->jsy*0.006), BOTH);
-  } else if(ctl->jsx > 10 || ctl->jsy < -10) {
-    mot->set_velocity((ctl->jsx*0.006), OPPOSITE);
-  } else {
-    mot->set_velocity(0, BOTH);
+
+  if(ctl->velR != last_velr) {
+    mot->set_velocity(ctl->velR, RIGHT);
+    last_velr = ctl->velR;
   }
+  if(ctl->velL != last_vell) {
+    mot->set_velocity(ctl->velL, LEFT);
+    last_vell = ctl->velL;
+  }
+
+  if(ctl->Kp != last_kp || ctl->Ki != last_ki || ctl->Kd != last_kd) {
+    mot->set_pid_constants(ctl->Kp, ctl->Ki, ctl->Kd);
+    last_kp = ctl->Kp;
+    last_ki = ctl->Ki;
+    last_kd = ctl->Kd;
+  }
+
   mot->loop();
   
 }

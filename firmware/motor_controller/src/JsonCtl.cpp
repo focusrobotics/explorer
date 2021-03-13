@@ -122,29 +122,30 @@ void JsonCtl::process_input_char(char c) {
 }
 
 void JsonCtl::update_ctl_struct() {
-  int32_t valn = val_string_to_num();
   if(name[0]=='j' && name[1]=='s' && name[2]=='x' && name[3]==0) {
-    ctlinfo.jsx = valn;
-    ser.print("jsx set to ");
-    ser.println(valn);
+    ctlinfo.jsx = atoi(val);
+    ser.print("{info: 'jsx set to "); ser.print(ctlinfo.jsx); ser.println("'}");
   } else if(name[0]=='j' && name[1]=='s' && name[2]=='y' && name[3]==0) {
-    ctlinfo.jsy = valn;
-    ser.print("jsy set to ");
-    ser.println(valn);
+    ctlinfo.jsy = atoi(val);
+    ser.print("{info: 'jsy set to "); ser.print(ctlinfo.jsy); ser.println("'}");
   } else if(name[0]=='b' && name[1]=='t' && name[2]=='0' && name[3]==0) {
-    ctlinfo.bt0 = valn;
-    ser.print("bt0 set to ");
-    ser.println(valn);
+    ctlinfo.bt0 = atoi(val);
+    ser.print("{info: 'bt0 set to "); ser.print(ctlinfo.bt0); ser.println("'}");
   } else if(name[0]=='v' && name[1]=='e' && name[2]=='l' && name[3]=='r' && name[4]==0) {
-    ctlinfo.velR = valn;
+    ctlinfo.velR = atof(val);
+    ser.print("{info: 'velr set to "); ser.print(ctlinfo.velR); ser.println("'}");
   } else if(name[0]=='v' && name[1]=='e' && name[2]=='l' && name[3]=='l' && name[4]==0) {
-    ctlinfo.velL = valn;
+    ctlinfo.velL = atof(val);
+    ser.print("{info: 'vell set to "); ser.print(ctlinfo.velL); ser.println("'}");
   } else if(name[0]=='k' && name[1]=='p' && name[2]==0) {
-    ctlinfo.Kp = valn;
+    ctlinfo.Kp = atoi(val);
+    ser.print("{info: 'kp set to "); ser.print(ctlinfo.Kp); ser.println("'}");
   } else if(name[0]=='k' && name[1]=='i' && name[2]==0) {
-    ctlinfo.Ki = valn;
+    ctlinfo.Ki = atoi(val);
+    ser.print("{info: 'ki set to "); ser.print(ctlinfo.Ki); ser.println("'}");
   } else if(name[0]=='k' && name[1]=='d' && name[2]==0) {
-    ctlinfo.Kd = valn;
+    ctlinfo.Kd = atoi(val);
+    ser.print("{info: 'kd set to "); ser.print(ctlinfo.Kd); ser.println("'}");
   }
 }
 
@@ -160,14 +161,15 @@ bool is_alphanumeric(char c) {
 }
 
 bool is_numeric(char c) {
-  return ((c>=0x30 && c<=0x39) || c=='+' || c=='-');
+  return ((c>=0x30 && c<=0x39) || c=='+' || c=='-' || c=='.');
 }
-
+/*
 // string is ascii numbers up to 3 chars with + or - optionally first
 // so can return between -999 and +999 decimal
 // since this can be 1 or 2 or 3 or 4 ascii chars, need to reorg the data first
 // loop from the end to find the first non-null char and that is the 1's place to save it in the accum
 // I actually have the number of chars so I could skip searching for nulls and just start processing at val[val_char_count-1]
+// FIXME: make this generic by passing in the array pointer and char count
 int32_t JsonCtl::val_string_to_num() {
   int32_t place_value_mult = 1;
   int32_t accum_val = 0;
@@ -192,3 +194,29 @@ int32_t JsonCtl::val_string_to_num() {
   return accum_val;
 }
 
+// string is ascii numbers up to n chars with initial + or - or a . somewhere in the value, all optional
+// first, break off anything to the right of the decimal point, if one exists
+// then, convert everything to the left of the decimal point with val_string_to_num()
+// then, convert everything to the right of the decimal point with a slightly different algo where place value is divided by 10 each char
+float JsonCtl::val_string_to_float() {
+  // scan for a decimal point and proceed depending on whether it exists and where
+  //
+  int dec_count = -1;
+  for(int i=0; i<val_char_count; i++) {
+    if(val[i]=='.') {
+      dec_count = i;
+      break;
+    }
+  }
+
+  if(dec_count==-1) { // no decimal point found
+    return val_string_to_num();
+  } else { // decimal point at dec_count
+    // get the whole number part
+    // get the fractional number part
+    // get the sign
+  }
+  
+  return -999.999;
+}
+*/

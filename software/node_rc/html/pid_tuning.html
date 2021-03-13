@@ -14,6 +14,9 @@
 	  margin-left: auto;
 	  margin-right: auto;
       }
+      input[type="text"] {
+	  width: 100px;
+      }
     </style>
     
     <title>Explorer Robot PID Tuning</title>
@@ -24,18 +27,24 @@
       // Need a function to draw the sliders for all parameters and current positions
       // Need listener functions for mousedown and up and state to handle dragging sliders and updating params based on the drag
       // Need a function to send the current parameters to the API when they change
-      var tunState = {
-	  rVel:0, lVel:0,
-	  Kp:0, Ki:0, Kd:0,
-	  minVel:0, maxVel:0.5, maxKp:1000, maxKi:1000, maxKd:1000,
-	  // top and bottom are the same for all controls, must track horizontal location and slider position for each control
-	  ctls: {bot:400, top:80, drag:0, dragnum:0,
-		 locs:[{hpos:120, knob:0}, {hpos:200, knob:120}, {hpos:360, knob:0}, {hpos:440, knob:0}, {hpos:520, knob:0}]}
+      var tunParms = {
+	  velr:0.0, vell:0.0,
+	  kp:1000, ki:0, kd:0
       };
+      
+      var minmax = {
+	  minVel:0, maxVel:0.5, maxKp:1000, maxKi:1000, maxKd:1000
+      };
+      // top and bottom are the same for all controls, must track horizontal location and slider position for each control
+      var ctls = {
+	  bot:400, top:80, drag:0, dragnum:0,
+	  locs:[{id:0, hpos:120, knob:0}, {id:1, hpos:200, knob:0}, {id:2, hpos:360, knob:0}, {id:3, hpos:440, knob:0}, {id:4, hpos:520, knob:0}]
+      };
+      var canvas;
+      var ctx;
+
 
       function drawControls() {
-	  var canvas = document.getElementById("pidControls"); // FIXME: get these once and save them
-	  var ctx = canvas.getContext("2d");
 	  // start by clearing the canvas
 	  ctx.clearRect(0, 0, 640, 480);
 	  ctx.fillStyle = "#000000";
@@ -53,46 +62,47 @@
 	  // 120,440 -> 120,40; 200,440; 280,440xxx; 360,440; 440,440; 520,440
 	  // if the slider is 320 high I could add hash marks every 32 but that would give 11 hashes not 10; but that's what I want
 
-	  let vTop = tunState.ctls.top;
-	  let vBot = tunState.ctls.bot;
-	  for (let h of tunState.ctls.locs) {
+	  let vTop = ctls.top;
+	  let vBot = ctls.bot;
+	  for (let h of ctls.locs) {
 	      ctx.moveTo(h.hpos, vBot);
 	      ctx.lineTo(h.hpos, vTop);
 	      ctx.stroke();
 	      ctx.fillRect(h.hpos-16, vBot-h.knob-4, 32, 8);
 	  }
-	  canvas.addEventListener("mousedown", mdown);
-	  canvas.addEventListener("mousemove", mmove);
-	  canvas.addEventListener("mouseup", mup);
       }
 
       // I'll want to deal with mouse-down, mouse-up, and mouse-move events
       // I'll care about a mouse-down within the bounding box of any slider knob, a mouse-up anywhere on the page if my slider is moving,
       // and a mouse-move if my slider is moving. The mouse-up will calculate the new values and call sendParams()
       function mdown(event) {
-	  //alert("mousedown event! " + event.offsetX + " " + event.offsetY);
-	  if(event.offsetX > tunState.ctls.locs[0].hpos-16 && event.offsetX < tunState.ctls.locs[0].hpos+16 &&
-	    event.offsetY > tunState.ctls.bot - tunState.ctls.locs[0].knob - 4 && event.offsetY < tunState.ctls.bot - tunState.ctls.locs[0].knob + 4) {
-	      tunState.ctls.drag = 1;
-	      tunState.ctls.dragnum = 0;
-	      console.log("Started drag");
-	      // instead of drawing once here, set up an interval to draw 20 times a second until the drag ends, only if a drag is started
+	  for (let h of ctls.locs) {
+	      if(event.offsetX > h.hpos-16 && event.offsetX < h.hpos+16 &&
+		 event.offsetY > ctls.bot - h.knob - 4 && event.offsetY < ctls.bot - h.knob + 4) {
+		  ctls.drag = 1;
+		  ctls.dragnum = h.id;
+		  console.log("Started drag");
+		  // instead of drawing once here, set up an interval to draw 20 times a second until the drag ends, only if a drag is started
+		  ctls.interval = setInterval(drawControls, 50);
+	      }
 	  }
-	  //drawControls();
       }
 
       function mup(event) {
-	  tunState.ctls.drag = 0;
-	  console.log("Ended drag");
-	  drawControls();
+	  if(ctls.drag) {
+	      ctls.drag = 0;
+	      console.log("Ended drag with mouse up event");
+	      clearInterval(ctls.interval);
+	      drawControls();
+	  }
       }
 
       function mmove(event) {
-	  if(tunState.ctls.drag) {
-	      tunState.ctls.locs[tunState.ctls.dragnum].knob -= event.movementY;
-	      console.log("moved " + tunState.ctls.locs[tunState.ctls.dragnum].knob);
-	      if(tunState.ctls.locs[tunState.ctls.dragnum].knob < 0) { tunState.ctls.locs[tunState.ctls.dragnum].knob = 0; }
-	      if(tunState.ctls.locs[tunState.ctls.dragnum].knob > 320) { tunState.ctls.locs[tunState.ctls.dragnum].knob = 320; }
+	  if(ctls.drag) {
+	      ctls.locs[ctls.dragnum].knob -= event.movementY;
+	      console.log("moved " + ctls.locs[ctls.dragnum].knob);
+	      if(ctls.locs[ctls.dragnum].knob < 0) { ctls.locs[ctls.dragnum].knob = 0; }
+	      if(ctls.locs[ctls.dragnum].knob > 320) { ctls.locs[ctls.dragnum].knob = 320; }
 	      //drawControls(); Don't redraw for every move, it can just be too many draws and get jumpy
 	      // instead, just record the positions here and redraw 20 times a second or so with an interval set up
 	      // at the start of the drag and disabled at the end of the drag
@@ -100,12 +110,46 @@
       }
 
       function mleave(event) {
-	  tunState.ctls.drag = 0;
-	  console.log("Left canvas which ended drag");
-	  drawControls();
+	  if(ctls.drag) {
+	      ctls.drag = 0;
+	      console.log("Left canvas which ended drag");
+	      clearInterval(ctls.interval);
+	      drawControls();
+	  }
       }
 
       function sendParams() {
+      }
+
+      function initControls() {
+	  canvas = document.getElementById("pidControls"); // FIXME: get these once and save them
+	  ctx = canvas.getContext("2d");
+	  drawControls();
+	  
+	  canvas.addEventListener("mousedown", mdown);
+	  canvas.addEventListener("mousemove", mmove);
+	  canvas.addEventListener("mouseup", mup);
+	  canvas.addEventListener("mouseleave", mleave);
+
+	  document.getElementById("velr").value = tunParms.velr;
+	  document.getElementById("vell").value = tunParms.vell;
+	  document.getElementById("kp").value = tunParms.kp;
+	  document.getElementById("ki").value = tunParms.ki;
+	  document.getElementById("kd").value = tunParms.kd;
+      }
+
+      function submitForm() {
+	  tunParms.velr = document.getElementById("velr").value;
+	  tunParms.vell = document.getElementById("vell").value;
+	  tunParms.kp = document.getElementById("kp").value;
+	  tunParms.ki = document.getElementById("ki").value;
+	  tunParms.kd = document.getElementById("kd").value;
+	  console.log(tunParms);
+
+	  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+	  xmlhttp.open("POST", "/api");
+	  xmlhttp.setRequestHeader("Content-Type", "application/json");
+	  xmlhttp.send(JSON.stringify(tunParms));
       }
       
     </script>
@@ -116,11 +160,29 @@
   <!-- set up the mouse events. After that drawControls() will only be called as a result of mouse events. -->
   <!-- There will also be a section below the controls which shows (and possibly graphs) requested and actual velocity over time. -->
   <!-- That section will simply be updated on an interval or as data arrives over the websocket -->
-  <body onload="drawControls()">
+  <body onload="initControls()">
     <h1>PID Tuning</h1>
     <canvas id="pidControls" width="640" height="480"></canvas>
     <!--  -->
     <!--  -->
     <!--  -->
+    <br>
+    <form onsubmit="return false;" method="post">
+      <label for="vell">Left Vel</label>
+      <input type="text" id="vell" name="vell">
+      <label for="velr">Right Vel</label>
+      <input type="text" id="velr" name="velr">
+      <br><br>
+      <label for="kp">Kp</label>
+      <input type="text" id="kp" name="kp">
+      <label for="ki">Ki</label>
+      <input type="text" id="ki" name="ki">
+      <label for="kd">Kd</label>
+      <input type="text" id="kd" name="kd">
+      <br><br>
+      <input type="submit" name="submit" onclick="submitForm()">
+    </form>
+    <br><br>
+    <a href="/">Main Page</a>
   </body>
 </html>

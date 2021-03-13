@@ -69,7 +69,8 @@ class JsonCtl {
 
   void update_ctl_struct();
   void clear_name_val_info();
-  int32_t val_string_to_num();
+  //int32_t val_string_to_num();
+  //float val_string_to_float();
 
   Stream & ser;
   enum ParserState {NOT_IN_CMD, CMD_NAME, CMD_VAL, CMPL_VAL, CMPL_CMD, ERROR};

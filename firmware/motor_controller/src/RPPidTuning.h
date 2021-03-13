@@ -51,6 +51,9 @@ class RPPidTuning: public RPBase {
 
   // This class either contains pointers to motor controllers or higher level classes like Motion or Movement
   Motion* mot;
+  float last_velr;
+  float last_vell;
+  uint32_t last_kp, last_ki, last_kd;
 };
 
 #endif

@@ -47,8 +47,8 @@ typedef struct {
   // how do I represent velocities? float or fixed point value?
   // one digit of whole number plus 3 digits of fraction would always be more than enough, so 16 bit fixed would work
   // 16 bit values could be velocity or motor power; should I reuse the same entries or have both?
-  uint16_t velR;
-  uint16_t velL;
+  float velR;
+  float velL;
   uint32_t Kp; // PID constants for PID tuning
   uint32_t Ki;
   uint32_t Kd;

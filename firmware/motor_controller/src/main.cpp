@@ -55,7 +55,7 @@ Top level for Fetch or Explorer robots
 #include "Odometry.h"
 #include "Motion.h"
 #include "RPManualMotion.h"
-
+#include "RPPidTuning.h"
 
 // Define constants for the interrupt pins used by the encoder and the type of encoder
 // There might also be a couple of derived encoder types like BasicEncoder and QuadratureEncoder, etc.
@@ -90,6 +90,7 @@ Motion motion(&mot, &odom);
 // RPMotion would use a MotionBase
 RPManual rpman(&mot);
 RPManualMotion rpmm(&motion);
+RPPidTuning rppid(&motion);
 
 //JoystickCtl jsctl;
 JsonCtl jsctl(Serial);
@@ -106,8 +107,9 @@ void setup() {
   mot.setup();
   rpman.setup();
   rpmm.setup();
+  rppid.setup();
   jsctl.setup();
-  jsctl.register_test(&rpmm);  // register rpman with jsctl
+  jsctl.register_test(&rppid);  // register rpman with jsctl
 
   last_odom_print = millis();
   last_jsctl = millis();
