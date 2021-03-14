@@ -109,7 +109,9 @@ void setup() {
   rpmm.setup();
   rppid.setup();
   jsctl.setup();
-  jsctl.register_test(&rppid);  // register rpman with jsctl
+  jsctl.register_test(&rpman, 0);  // register rpman with jsctl
+  jsctl.register_test(&rpmm, 1);  // register rpmm with jsctl
+  jsctl.register_test(&rppid, 2);  // register rppid with jsctl
 
   last_odom_print = millis();
   last_jsctl = millis();

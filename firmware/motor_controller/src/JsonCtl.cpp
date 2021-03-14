@@ -44,6 +44,7 @@ void JsonCtl::setup() {
   // Init any class variables
   jpstate = NOT_IN_CMD;
   bt_send_interval = 750;
+  current_test = 0;
 
   // Flush the serial stream. The higher level must have already called begin at the appropriate baud rate.
   //ser.begin(9600);
@@ -67,11 +68,11 @@ void JsonCtl::loop() {
   // Run subprogram if any are selected; just run manual at first
   //Serial.print(tests);
   //test->status();
-  test->loop(&ctlinfo);
+  test[current_test]->loop(&ctlinfo);
 }
 
-void JsonCtl::register_test(RPBase* t) {
-  test = t;
+void JsonCtl::register_test(RPBase* t, uint8_t id) {
+  test[id] = t;
 }
 
 // The format is JSON
@@ -152,6 +153,9 @@ void JsonCtl::update_ctl_struct() {
   } else if(name[0]=='d' && name[1]=='f' && name[2]=='r' && name[3]=='q' && name[4]==0) {
     ctlinfo.debug_freq = atoi(val);
     ser.print("{info: 'debug_freq set to "); ser.print(ctlinfo.debug_freq); ser.println("'}");
+  } else if(name[0]=='t' && name[1]=='s' && name[2]=='t' && name[3]=='n' && name[4]==0) {
+    current_test = atoi(val);
+    ser.print("{info: 'current_test set to "); ser.print(current_test); ser.println("'}");
   }    
     //  } else if(name[0]=='' && name[1]=='' && name[2]=='' && name[3]=='' && name[4]==0) {
 }

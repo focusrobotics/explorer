@@ -65,7 +65,7 @@ class JsonCtl {
   // Run the test which is currently selected; start and stop as appropriate on button changes
   // called from loop, or from the top of the sketch
   //void run_test();
-  void register_test(RPBase* t);
+  void register_test(RPBase* t, uint8_t id);
 
   void update_ctl_struct();
   void clear_name_val_info();
@@ -82,7 +82,8 @@ class JsonCtl {
 
   rpctl_info ctlinfo; // This struct always has the current joystick state
 
-  RPBase* test; // up to 6 tests can be registered to run when buttons are pressed
+  RPBase* test[8]; // up to 8 tests can be registered to run when directed
+  uint8_t current_test;
 
   long bt_prev_send;
   int bt_send_interval;

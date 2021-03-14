@@ -136,6 +136,11 @@
 	  document.getElementById("kp").value = tunParms.kp;
 	  document.getElementById("ki").value = tunParms.ki;
 	  document.getElementById("kd").value = tunParms.kd;
+
+	  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+	  xmlhttp.open("POST", "/api");
+	  xmlhttp.setRequestHeader("Content-Type", "application/json");
+	  xmlhttp.send(JSON.stringify({tstn:2}));
       }
 
       function submitForm() {

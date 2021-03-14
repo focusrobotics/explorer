@@ -116,6 +116,10 @@
 	      ctx.drawImage(myImage, 0, 0);
 	      console.log("drew it");
 	  };
+	  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+	  xmlhttp.open("POST", "/api");
+	  xmlhttp.setRequestHeader("Content-Type", "application/json");
+	  xmlhttp.send(JSON.stringify({tstn:0}));
       }
     </script>
     
