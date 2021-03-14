@@ -146,7 +146,14 @@ void JsonCtl::update_ctl_struct() {
   } else if(name[0]=='k' && name[1]=='d' && name[2]==0) {
     ctlinfo.Kd = atoi(val);
     ser.print("{info: 'kd set to "); ser.print(ctlinfo.Kd); ser.println("'}");
-  }
+  } else if(name[0]=='d' && name[1]=='i' && name[2]=='n' && name[3]=='f' && name[4]==0) {
+    ctlinfo.debug_info = atoi(val);
+    ser.print("{info: 'debug_info set to "); ser.print(ctlinfo.debug_info); ser.println("'}");
+  } else if(name[0]=='d' && name[1]=='f' && name[2]=='r' && name[3]=='q' && name[4]==0) {
+    ctlinfo.debug_freq = atoi(val);
+    ser.print("{info: 'debug_freq set to "); ser.print(ctlinfo.debug_freq); ser.println("'}");
+  }    
+    //  } else if(name[0]=='' && name[1]=='' && name[2]=='' && name[3]=='' && name[4]==0) {
 }
 
 void JsonCtl::clear_name_val_info() {

@@ -117,24 +117,24 @@ void setup() {
 
 // Main loop
 void loop() {
-  if(millis() > (last_jsctl + 50)) {
+  if(millis() > (last_jsctl + 100)) {
     last_jsctl = millis();
     jsctl.loop();
   }
-  if(millis() > (last_odom_print + 500)) {
-    last_odom_print = millis();
+  // if(millis() > (last_odom_print + 200)) {
+  //   last_odom_print = millis();
 
-    //odom.loop();
-    double rvel = odom.get_velocity(RIGHT_MOTOR);
-    double lvel = odom.get_velocity(LEFT_MOTOR);
-    robot_pose p = odom.get_pose();
-    int32_t pos1 = enc1.read();
-    int32_t pos2 = enc2.read();
+  //   //odom.loop();
+  //   double rvel = odom.get_velocity(RIGHT_MOTOR);
+  //   double lvel = odom.get_velocity(LEFT_MOTOR);
+  //   robot_pose p = odom.get_pose();
+  //   int32_t pos1 = enc1.read();
+  //   int32_t pos2 = enc2.read();
 
-    Serial.print("pos1="); Serial.print(pos1); Serial.print(" pos2="); Serial.print(pos2); 
-    Serial.print(" rv="); Serial.print(rvel); Serial.print(" lv="); Serial.print(lvel);
-    Serial.print(" x="); Serial.print(p.x); Serial.print(" y="); Serial.print(p.y); Serial.print(" heading="); Serial.println(p.heading); 
-  }
+  //   Serial.print("pos1="); Serial.print(pos1); Serial.print(" pos2="); Serial.print(pos2); 
+  //   Serial.print(" rv="); Serial.print(rvel); Serial.print(" lv="); Serial.print(lvel);
+  //   Serial.print(" x="); Serial.print(p.x); Serial.print(" y="); Serial.print(p.y); Serial.print(" heading="); Serial.println(p.heading); 
+  // }
 
 }
 

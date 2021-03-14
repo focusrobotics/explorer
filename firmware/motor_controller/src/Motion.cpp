@@ -53,8 +53,8 @@ void Motion::setup() {
   // Initialize motors
   mot->setup();
   odom->setup();
-  rPID.SetOutputLimits(0,1023);
-  lPID.SetOutputLimits(0,1023);
+  rPID.SetOutputLimits(-1023,1023);
+  lPID.SetOutputLimits(-1023,1023);
   rPID.SetMode(AUTOMATIC);
   lPID.SetMode(AUTOMATIC);
 }
@@ -65,10 +65,10 @@ void Motion::loop() {
   odom->loop();
   rMotorVelocity = odom->get_velocity(RIGHT_MOTOR);
   lMotorVelocity = odom->get_velocity(LEFT_MOTOR);
-  //Serial.print("rreqVel="); Serial.print(rMotorRequestedVelocity);
-  //Serial.print(" rvel="); Serial.print(rMotorVelocity);
-  //Serial.print(" lreqVel="); Serial.print(lMotorRequestedVelocity);
-  //Serial.print(" lvel="); Serial.print(lMotorVelocity);
+  Serial.print("rreqVel="); Serial.print(rMotorRequestedVelocity);
+  Serial.print(" rvel="); Serial.print(rMotorVelocity);
+  Serial.print(" lreqVel="); Serial.print(lMotorRequestedVelocity);
+  Serial.print(" lvel="); Serial.print(lMotorVelocity);
   
   // Call compute() on the PID controllers to compute motor power based on actual velocity and requested velocity for each motor
   lPID.Compute();
@@ -77,7 +77,7 @@ void Motion::loop() {
   // Set the motor power values to what the PID controller computed
   rmp = rMotorPower;
   lmp = lMotorPower;
-  //Serial.print(" rmp="); Serial.print(rMotorPower); Serial.print(" lmp="); Serial.println(lMotorPower); 
+  Serial.print(" rmp="); Serial.print(rMotorPower); Serial.print(" lmp="); Serial.println(lMotorPower); 
   if(rmp != prmp) {
     mot->set_speed(RIGHT_MOTOR, rmp);
     prmp = rmp;

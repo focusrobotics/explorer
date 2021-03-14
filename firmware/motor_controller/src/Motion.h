@@ -55,6 +55,7 @@ class Motion {
   void set_velocity(double v, velocity_setting_t t);
   void set_acceleration(double a); // maximum accel as robot gets up (or down) to new velocity (this doesn't do anything yet)
   void set_pid_constants(uint32_t Kp, uint32_t Ki, uint32_t Kd);
+  void set_debug_prints(uint16_t info, uint16_t freq); // control what is printed: req vel, actual velocity, pose, motor power, encoder values; and the print frequency
 
   // This class stores a velocity for right and left wheels, a max acceleration, and 2 PID controllers.
   // Velocity and acceleration for each wheel come from odometry so it also has an odometery class.
@@ -68,7 +69,7 @@ class Motion {
   double rMotorPower;
   char lMotorState;
   char rMotorState;
-  uint16_t lmp, plmp, rmp, prmp;
+  int16_t lmp, plmp, rmp, prmp;
 
   double lMotorVelocity;
   double lMotorRequestedVelocity;

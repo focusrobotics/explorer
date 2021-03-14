@@ -61,6 +61,7 @@ void VNH5019_MotorPair::setup() {
   _INA2 = 6;
   _INB2 = 7;
   _PWM2 = 8;
+  analogWriteResolution(10);
   analogWriteFrequency(_PWM1, 5000);
   analogWriteFrequency(_PWM2, 5000);
 #endif
@@ -75,8 +76,9 @@ void VNH5019_MotorPair::setup() {
 }
 
 void VNH5019_MotorPair::set_speed(motor_select_t mot, int16_t speed) {
-  // input speed is +/-1023. For analogWrite I must scale to 0-255.
-  int16_t pow = abs(speed) / 4;
+  // input speed is +/-1023. For analogWrite I must scale to 0-255; but not for Teensy, I just change the resolution to 10 bits for teensy in setup()
+  //int16_t pow = abs(speed) / 4;
+  int16_t pow = abs(speed);
   if(mot==RIGHT_MOTOR) {
     if(speed>0) { // clockwise for positive speed
       digitalWrite(_INA1, HIGH);

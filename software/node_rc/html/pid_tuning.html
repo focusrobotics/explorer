@@ -145,11 +145,22 @@
 	  tunParms.ki = document.getElementById("ki").value;
 	  tunParms.kd = document.getElementById("kd").value;
 	  console.log(tunParms);
+	  postToRobot();
+      }
 
+      function postToRobot() {
 	  var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
 	  xmlhttp.open("POST", "/api");
 	  xmlhttp.setRequestHeader("Content-Type", "application/json");
 	  xmlhttp.send(JSON.stringify(tunParms));
+      }
+
+      function setVelocity(v) {
+	  tunParms.velr = v;
+	  tunParms.vell = v;
+	  document.getElementById("velr").value = v;
+	  document.getElementById("vell").value = v;
+	  postToRobot();
       }
       
     </script>
@@ -182,6 +193,12 @@
       <br><br>
       <input type="submit" name="submit" onclick="submitForm()">
     </form>
+    <br><br>
+    <button onclick="setVelocity(-0.4)">-0.4</button>
+    <button onclick="setVelocity(-0.2)">-0.2</button>
+    <button onclick="setVelocity(0.0)">0.0</button>
+    <button onclick="setVelocity(0.2)">0.2</button>
+    <button onclick="setVelocity(0.4)">0.4</button>
     <br><br>
     <a href="/">Main Page</a>
   </body>

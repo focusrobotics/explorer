@@ -53,6 +53,8 @@ typedef struct {
   uint32_t Ki;
   uint32_t Kd;
   // I want some controls to turn messages on and off and control debug and info level
+  uint16_t debug_info; // just hard-code 16 types of info for now
+  uint16_t debug_freq; // 0 is never update, 1 is every loop, n is every nth loop; might have change events too but not sure how
 } rpctl_info;
 
 class RPBase {
