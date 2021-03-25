@@ -65,19 +65,35 @@ void Motion::loop() {
   odom->loop();
   rMotorVelocity = odom->get_velocity(RIGHT_MOTOR);
   lMotorVelocity = odom->get_velocity(LEFT_MOTOR);
-  Serial.print("rreqVel="); Serial.print(rMotorRequestedVelocity);
-  Serial.print(" rvel="); Serial.print(rMotorVelocity);
-  Serial.print(" lreqVel="); Serial.print(lMotorRequestedVelocity);
-  Serial.print(" lvel="); Serial.print(lMotorVelocity);
   
   // Call compute() on the PID controllers to compute motor power based on actual velocity and requested velocity for each motor
   lPID.Compute();
   rPID.Compute();
 
+  if(debug_info & (DEBUG_FLAG_DISP_MPOWER | DEBUG_FLAG_DISP_ETICKS | DEBUG_FLAG_DISP_ACT_VEL | DEBUG_FLAG_DISP_POSE)) {
+    Serial.print("{ ");
+    if(debug_info & DEBUG_FLAG_DISP_MPOWER) {
+      Serial.print("rmp: "); Serial.print(rMotorPower); Serial.print(", lmp: "); Serial.print(lMotorPower); Serial.print(", ");
+    }
+    if(debug_info & DEBUG_FLAG_DISP_ETICKS) {
+      //int32_t e1 = enc1.read();
+      //int32_t e2 = enc2.read();
+      //Serial.print("e1: "); Serial.print(e1); Serial.print(", e2: "); Serial.print(e2); Serial.print(", ");
+    }
+    if(debug_info & DEBUG_FLAG_DISP_ACT_VEL) {
+      Serial.print("rvel: "); Serial.print(rMotorVelocity); Serial.print(", lvel: "); Serial.print(lMotorVelocity); Serial.print(", ");
+    }
+    if(debug_info & DEBUG_FLAG_DISP_POSE) {
+      robot_pose p = odom->get_pose();
+      Serial.print("x: "); Serial.print(p.x); Serial.print(", y: "); Serial.print(p.y); Serial.print(", heading: "); Serial.println(p.heading);
+    }
+    Serial.println(" }");
+  }
+  
   // Set the motor power values to what the PID controller computed
   rmp = rMotorPower;
   lmp = lMotorPower;
-  Serial.print(" rmp="); Serial.print(rMotorPower); Serial.print(" lmp="); Serial.println(lMotorPower); 
+  //Serial.print(" rmp="); Serial.print(rMotorPower); Serial.print(" lmp="); Serial.println(lMotorPower); 
   if(rmp != prmp) {
     mot->set_speed(RIGHT_MOTOR, rmp);
     prmp = rmp;
@@ -119,4 +135,9 @@ void Motion::set_acceleration(double a) {
 void Motion::set_pid_constants(uint32_t Kp, uint32_t Ki, uint32_t Kd) {
   lPID.SetTunings(Kp, Ki, Kd);
   rPID.SetTunings(Kp, Ki, Kd);
+}
+
+void Motion::set_debug_prints(uint16_t info, uint16_t freq) {
+  debug_info = info;
+  debug_freq = freq;
 }

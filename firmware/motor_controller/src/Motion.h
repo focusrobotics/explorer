@@ -40,6 +40,7 @@
 #include "Odometry.h" // need to get velocity and acceleration
 #include "MotorPair.h"
 #include <PID_v1.h>
+#include "RPBase.h" // don't include this long-term; move debug stuff to another header to separate
 
 typedef enum {RIGHT, LEFT, BOTH, OPPOSITE} velocity_setting_t;
 
@@ -62,6 +63,7 @@ class Motion {
   // It does not try to manage absolute position or heading, those are for a higher level to deal with.
   Odometry* odom;
   double max_acc;
+  uint16_t debug_info, debug_freq;
 
   // Classes and variables to access the motor and store its current state
   MotorPair* mot;

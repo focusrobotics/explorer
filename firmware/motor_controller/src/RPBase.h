@@ -57,6 +57,22 @@ typedef struct {
   uint16_t debug_freq; // 0 is never update, 1 is every loop, n is every nth loop; might have change events too but not sure how
 } rpctl_info;
 
+#define DEBUG_FLAG_DISP_MPOWER   1
+#define DEBUG_FLAG_DISP_ETICKS   2
+#define DEBUG_FLAG_DISP_REQ_VEL  4
+#define DEBUG_FLAG_DISP_ACT_VEL  8
+#define DEBUG_FLAG_DISP_POSE     16
+
+enum DebugFlags {
+  DispMotorPower = 1,
+  DispVelocity   = 2,
+  DispPose       = 4
+};
+// I could use this to declare debug_info as a DebugFlags and achieve some type safety
+//inline DebugFlags operator|(DebugFlags a, DebugFlags b) {
+//  return static_case<DebugFlags>(static_cast<uint16_t>(a) | static_cast<unit16_t>(b));
+//}
+
 class RPBase {
  public:
   RPBase();

@@ -54,6 +54,7 @@ class RPPidTuning: public RPBase {
   float last_velr;
   float last_vell;
   uint32_t last_kp, last_ki, last_kd;
+  uint16_t last_debug_info, last_debug_freq;
 };
 
 #endif
