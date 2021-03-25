@@ -40,12 +40,6 @@
 #include "Arduino.h"
 #include "RPBase.h"
 
-/*typedef struct {
-  byte joyx;
-  byte joyy;
-  byte buttons;
-  } jsctl_info;*/
-
 class JsonCtl {
  public:
   JsonCtl(Stream &s); // This can be a usbserial or hwserial class, must have begin() called on it already at the correct baud rate
@@ -53,24 +47,14 @@ class JsonCtl {
   void setup();
   void loop();
 
-  // This is called from loop if I keep a ref to the serial port, or from the top of the sketch
-  void process_input_char(char c);
-
-  // These are called by process_input_char() when it receives a full command
-  // They simply process cmd to avoid an extra data copy
-  //void update_joystick_state();
-  //void update_button_state();
-  //char* get_status_string();
-
-  // Run the test which is currently selected; start and stop as appropriate on button changes
-  // called from loop, or from the top of the sketch
-  //void run_test();
+  // The top level main routine calls this during setup to register multiple RPBase programs so the
+  // robot firmware can support different behaviors or modes of operation.
   void register_test(RPBase* t, uint8_t id);
 
+  // Internal calls, probably make private
+  void process_input_char(char c);
   void update_ctl_struct();
   void clear_name_val_info();
-  //int32_t val_string_to_num();
-  //float val_string_to_float();
 
   Stream & ser;
   enum ParserState {NOT_IN_CMD, CMD_NAME, CMD_VAL, CMPL_VAL, CMPL_CMD, ERROR};
@@ -84,9 +68,6 @@ class JsonCtl {
 
   RPBase* test[8]; // up to 8 tests can be registered to run when directed
   uint8_t current_test;
-
-  long bt_prev_send;
-  int bt_send_interval;
 
 };
 bool is_alphanumeric(char c);

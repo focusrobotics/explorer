@@ -43,31 +43,22 @@ JsonCtl::~JsonCtl() {}
 void JsonCtl::setup() {
   // Init any class variables
   jpstate = NOT_IN_CMD;
-  bt_send_interval = 750;
   current_test = 0;
 
   // Flush the serial stream. The higher level must have already called begin at the appropriate baud rate.
-  //ser.begin(9600);
   while(ser.available()) { ser.read(); }
 }
 
 void JsonCtl::loop() {
-  // process any bluetooth input chars that are waiting
+  // process any input chars that are waiting
   while(ser.available()) {
     process_input_char(ser.read());
   }
 
-  // send the status string back to bluetooth if it has been long enough
-  long current_millis = millis();
-  if(current_millis - bt_prev_send > bt_send_interval) {
-    bt_prev_send = current_millis;
+  // Nothing is sent back over the serial link from here. Lower level classes send JSON directly to the port
+  // based on the debug_info and debug_freq values set from the input stream.
 
-    // Status will be sent in JSON format and fields will be sent when requested.
-  }
-
-  // Run subprogram if any are selected; just run manual at first
-  //Serial.print(tests);
-  //test->status();
+  // Run subprogram currently selected
   test[current_test]->loop(&ctlinfo);
 }
 
@@ -122,6 +113,9 @@ void JsonCtl::process_input_char(char c) {
   }
 }
 
+// FIXME: this was an OK way to quickly get started but it has already grown too large for such a simple
+// approach. There needs to be a string matching function and a table of commands instead of this overgrown
+// 'if' structure.
 void JsonCtl::update_ctl_struct() {
   if(name[0]=='j' && name[1]=='s' && name[2]=='x' && name[3]==0) {
     ctlinfo.jsx = atoi(val);
@@ -174,60 +168,3 @@ bool is_alphanumeric(char c) {
 bool is_numeric(char c) {
   return ((c>=0x30 && c<=0x39) || c=='+' || c=='-' || c=='.');
 }
-/*
-// string is ascii numbers up to 3 chars with + or - optionally first
-// so can return between -999 and +999 decimal
-// since this can be 1 or 2 or 3 or 4 ascii chars, need to reorg the data first
-// loop from the end to find the first non-null char and that is the 1's place to save it in the accum
-// I actually have the number of chars so I could skip searching for nulls and just start processing at val[val_char_count-1]
-// FIXME: make this generic by passing in the array pointer and char count
-int32_t JsonCtl::val_string_to_num() {
-  int32_t place_value_mult = 1;
-  int32_t accum_val = 0;
-  //ser.print("tonum ");
-  //ser.print(val_char_count);
-  for(int i=val_char_count; i>0; i--) {
-    //ser.print("tonum ");
-    //ser.print(i);
-    //ser.print(" ");
-    //ser.println(val[i-1]);
-    if(val[i-1] == '+') { continue; }
-    else if(val[i-1] == '-') { accum_val = accum_val * -1; }
-    else if(val[i-1] >= 48 && val[i-1] <= 57) {
-      accum_val += (val[i-1] - 48) * place_value_mult;
-      place_value_mult *= 10;
-      //ser.print("to_num char ");
-      //ser.print(val[i-1]);
-      //ser.print(" acc ");
-      //ser.println(accum_val);
-    } // else it's an error, but how do I report it?
-  }
-  return accum_val;
-}
-
-// string is ascii numbers up to n chars with initial + or - or a . somewhere in the value, all optional
-// first, break off anything to the right of the decimal point, if one exists
-// then, convert everything to the left of the decimal point with val_string_to_num()
-// then, convert everything to the right of the decimal point with a slightly different algo where place value is divided by 10 each char
-float JsonCtl::val_string_to_float() {
-  // scan for a decimal point and proceed depending on whether it exists and where
-  //
-  int dec_count = -1;
-  for(int i=0; i<val_char_count; i++) {
-    if(val[i]=='.') {
-      dec_count = i;
-      break;
-    }
-  }
-
-  if(dec_count==-1) { // no decimal point found
-    return val_string_to_num();
-  } else { // decimal point at dec_count
-    // get the whole number part
-    // get the fractional number part
-    // get the sign
-  }
-  
-  return -999.999;
-}
-*/

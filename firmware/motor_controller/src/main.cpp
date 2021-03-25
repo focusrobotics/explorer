@@ -96,7 +96,7 @@ RPPidTuning rppid(&motion);
 JsonCtl jsctl(Serial);
 // Other RP classes would not be joystick controlled, but might be kicked off with button presses from the joystick or activated from
 // other Ctl classes like RasPiCtl or SerialCtl or something like that.
-unsigned long last_odom_print;
+//unsigned long last_odom_print;
 unsigned long last_jsctl;
 
 void setup() {
@@ -113,7 +113,7 @@ void setup() {
   jsctl.register_test(&rpmm, 1);  // register rpmm with jsctl
   jsctl.register_test(&rppid, 2);  // register rppid with jsctl
 
-  last_odom_print = millis();
+  //last_odom_print = millis();
   last_jsctl = millis();
 }
 

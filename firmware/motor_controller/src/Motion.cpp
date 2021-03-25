@@ -46,6 +46,8 @@ Motion::Motion(MotorPair* m, Odometry* o)
   rMotorPower = 0;
   lMotorState = 0;
   rMotorState = 0;
+  debug_info = 0;
+  debug_freq = 0;
 }
 Motion::~Motion() {}
 
@@ -85,7 +87,7 @@ void Motion::loop() {
     }
     if(debug_info & DEBUG_FLAG_DISP_POSE) {
       robot_pose p = odom->get_pose();
-      Serial.print("x: "); Serial.print(p.x); Serial.print(", y: "); Serial.print(p.y); Serial.print(", heading: "); Serial.println(p.heading);
+      Serial.print("x: "); Serial.print(p.x); Serial.print(", y: "); Serial.print(p.y); Serial.print(", heading: "); Serial.print(p.heading);
     }
     Serial.println(" }");
   }
@@ -93,7 +95,6 @@ void Motion::loop() {
   // Set the motor power values to what the PID controller computed
   rmp = rMotorPower;
   lmp = lMotorPower;
-  //Serial.print(" rmp="); Serial.print(rMotorPower); Serial.print(" lmp="); Serial.println(lMotorPower); 
   if(rmp != prmp) {
     mot->set_speed(RIGHT_MOTOR, rmp);
     prmp = rmp;
@@ -109,6 +110,7 @@ void Motion::loop() {
 // This might cause problems if changing from positive to negative velocity when the wheel is moving, but we shouldn't do that
 // For Fetch, slowest is probably 0.05m/s but 0.1m/s is a more reasonable slow speed
 // The fastest it can achieve with no load is about 0.7m/s but probably 0.5 or 0.6 is really the fastest I can do reliably under load at 6v
+// Explorer is probably right around .5 or .6 m/s, but I'll measure that
 void Motion::set_velocity(double v, velocity_setting_t t) {
   switch(t) {
   case RIGHT:

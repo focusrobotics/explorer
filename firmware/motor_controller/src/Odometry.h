@@ -29,7 +29,6 @@
  * Issues:
  *
  * Encoder class
- * Should I try to do all math using ints? Or use float/doubles?
  * Floats and doubles are the same on AVR
  * An integer multiple is about 1us, float/double is 9us
  * Float/double divide is around 34us
@@ -59,37 +58,37 @@ typedef struct {
 class Odometry {
  public:
   // baseline in mm, distance per tick in mm/tick
+  // b is baseline and ldt, rdt are separate right and left distances per tick
   Odometry(Encoder* re, Encoder* le, double b, double ldt, double rdt); // pass in robot specific stuff to constructor
   ~Odometry();
   void setup();
   void loop();
 
-  // Compute the current pose based on the previous pose and any wheel encoder changes since the last call
-  // This is called from the loop() function, possibly at a limited rate
-  // maybe just call this calc, it also needs to calc velocity and acceleration, unless I decide to only calc those on demand or something
-  void calc_pose();
-
   // get the current pose
   robot_pose get_pose(); // will return a pose struct
-  //double get_x(); // not sure if I'll keep individual get functions, but maybe easier for now
-  //double get_y();
-  //double get_heading();
+  // set the current pose (for init of pose or for adjusting pose due to localization)
+  void set_pose(robot_pose new_pose); // will take a pose struct, cannot fail
   double get_velocity(motor_select_t m);
   double get_acceleration(motor_select_t m);
 
-  // set the current pose (for init of pose or for adjusting pose due to localization)
-  void set_pose(robot_pose new_pose); // will take a pose struct, cannot fail
+  // Other public functions
+  void reset_encoders(); // safely clear encoder values without confusing pose or velocity
+  // should there be a function to read the encoders here for when I want those values at higher levels?
 
-  // Needs an encoder class to get ticks, specify to robot
+  // Compute the current pose based on the previous pose and any wheel encoder changes since the last call
+  // This is called from the loop() function at a limited rate
+  void calc_pose();
+
+  // Encoder classes used to measure wheel distance traveled
   Encoder* renc;
   Encoder* lenc;
 
-  // Need other robot params
+  // Robot params saved from constructor and used for calcs
   double robot_baseline;
   double left_dist_tick;
   double right_dist_tick;
 
-  // Needs to keep a current pose
+  // Current pose
   robot_pose pose;
 
   // velocity and acceleration for both wheels... needed for Motion class and PID control
@@ -99,6 +98,7 @@ class Odometry {
   double right_velocity;
   double right_acceleration;
 
+  // Keep previous state for incremental distance and velocity calcs
   int prevRightTicks;
   int prevLeftTicks;
   unsigned long prevRightMillis;

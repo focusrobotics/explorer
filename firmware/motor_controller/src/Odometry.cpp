@@ -74,6 +74,33 @@ void Odometry::loop() {
   calc_pose();
 }
 
+// Velocity is reported in meters/second
+double Odometry::get_velocity(motor_select_t m) {
+  if(m == RIGHT_MOTOR) {
+    return right_velocity;
+  } else {
+    return left_velocity;
+  }
+}
+
+// Acceleration currently isn't calculated and just returns garbage
+double Odometry::get_acceleration(motor_select_t m) {
+  if(m == RIGHT_MOTOR) {
+    return right_acceleration;
+  } else {
+    return left_acceleration;
+  }
+}
+
+// Pose x and y is in mm from the origin and heading is in radians
+robot_pose Odometry::get_pose() {
+  return pose;
+}
+
+void Odometry::set_pose(robot_pose new_pose) {
+  pose = new_pose;
+}
+
 void Odometry::calc_pose() {
   // get ticks from encoders
   int curRightTicks = renc->read();
@@ -109,26 +136,3 @@ void Odometry::calc_pose() {
   pose.y += incrDist * sin(pose.heading);
 }
 
-robot_pose Odometry::get_pose() {
-  return pose;
-}
-
-double Odometry::get_velocity(motor_select_t m) {
-  if(m == RIGHT_MOTOR) {
-    return right_velocity;
-  } else {
-    return left_velocity;
-  }
-}
-
-double Odometry::get_acceleration(motor_select_t m) {
-  if(m == RIGHT_MOTOR) {
-    return right_acceleration;
-  } else {
-    return left_acceleration;
-  }
-}
-
-void Odometry::set_pose(robot_pose new_pose) {
-  pose = new_pose;
-}

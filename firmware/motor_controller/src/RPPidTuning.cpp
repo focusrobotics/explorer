@@ -45,7 +45,6 @@ RPPidTuning::~RPPidTuning() {
 
 void RPPidTuning::setup() {
   mot->setup();
-  mot->set_debug_prints(0xffff, 0);
 }
 
 void RPPidTuning::status() {
@@ -79,6 +78,12 @@ void RPPidTuning::loop(rpctl_info* ctl) {
     last_kp = ctl->Kp;
     last_ki = ctl->Ki;
     last_kd = ctl->Kd;
+  }
+
+  if(ctl->debug_info != last_debug_info || ctl->debug_freq != last_debug_freq) {
+    mot->set_debug_prints(debug_info, debug_freq);
+    last_debug_info = debug_info;
+    last_debug_freq = debug_freq;
   }
 
   mot->loop();
