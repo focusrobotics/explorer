@@ -70,6 +70,19 @@ wssVid.on('connection', function connection(ws) {
 	console.log('Video websocket received %s', message);
     });
     //ws.send('websocket message from server');
+    console.log("video client connected");
+    ws.send(JSON.stringify({
+      action: 'init',
+      width: '960',
+      height: '540'
+    }));
+    videoStream.on('data', (data) => {
+        ws.send(data, { binary: true }, (error) => { if (error) console.error(error); });
+    });
+    ws.on('close', () => {
+        console.log('video Client left');
+        videoStream.removeAllListeners('data');
+    });
 });
 
 // Don't create the response at all until req.url is considered
@@ -292,12 +305,15 @@ if(useSerial) {
     });
 }
 
-if(liveImages) {
-    videoStream.on('data', (data) => {
-	wss.clients.forEach(function each(client) {
-	    if(client.readyState === WebSocket.OPEN) {
-		client.send(data, { binary: true }, (error) => { if (error) console.error(error); });
-	    }
-	});
-    });
-}
+//if(liveImages) {
+//    videoStream.on('data', (data) => {
+	//console.log("New videoStream data");
+//	wssVid.clients.forEach(function each(client) {
+	    //console.log("A client for video data");
+//	    if(client.readyState === WebSocket.OPEN) {
+//		client.send(data, { binary: true }, (error) => { if (error) console.error(error); });
+		//console.log("videoStream data send to a client");
+//	    }
+//	});
+//    });
+//}
