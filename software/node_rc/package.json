@@ -2,9 +2,12 @@
     "name": "explorer-server",
     "version": "0.0.1",
     "description": "Provides the API and serves control pages for the Explorer robot.",
-    "main": "basic_server.js",
+    "main": "rc_server.js",
+    "repository": "github:focusrobotics/explorer",
     "license": "MIT",
     "dependencies": {
-        "serialport": "^9.0.2"
+        "raspivid-stream": "^0.2.1",
+        "serialport": "^9.0.2",
+        "ws": "^7.4.4"
     }
 }

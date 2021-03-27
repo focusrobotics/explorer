@@ -119,37 +119,37 @@ void JsonCtl::process_input_char(char c) {
 void JsonCtl::update_ctl_struct() {
   if(name[0]=='j' && name[1]=='s' && name[2]=='x' && name[3]==0) {
     ctlinfo.jsx = atoi(val);
-    ser.print("{info: 'jsx set to "); ser.print(ctlinfo.jsx); ser.println("'}");
+    ser.print("{\"info\": \"jsx set to "); ser.print(ctlinfo.jsx); ser.println("\"}");
   } else if(name[0]=='j' && name[1]=='s' && name[2]=='y' && name[3]==0) {
     ctlinfo.jsy = atoi(val);
-    ser.print("{info: 'jsy set to "); ser.print(ctlinfo.jsy); ser.println("'}");
+    ser.print("{\"info\": \"jsy set to "); ser.print(ctlinfo.jsy); ser.println("\"}");
   } else if(name[0]=='b' && name[1]=='t' && name[2]=='0' && name[3]==0) {
     ctlinfo.bt0 = atoi(val);
-    ser.print("{info: 'bt0 set to "); ser.print(ctlinfo.bt0); ser.println("'}");
+    ser.print("{\"info\": \"bt0 set to "); ser.print(ctlinfo.bt0); ser.println("\"}");
   } else if(name[0]=='v' && name[1]=='e' && name[2]=='l' && name[3]=='r' && name[4]==0) {
     ctlinfo.velR = atof(val);
-    ser.print("{info: 'velr set to "); ser.print(ctlinfo.velR); ser.println("'}");
+    ser.print("{\"info\": \"velr set to "); ser.print(ctlinfo.velR); ser.println("\"}");
   } else if(name[0]=='v' && name[1]=='e' && name[2]=='l' && name[3]=='l' && name[4]==0) {
     ctlinfo.velL = atof(val);
-    ser.print("{info: 'vell set to "); ser.print(ctlinfo.velL); ser.println("'}");
+    ser.print("{\"info\": \"vell set to "); ser.print(ctlinfo.velL); ser.println("\"}");
   } else if(name[0]=='k' && name[1]=='p' && name[2]==0) {
     ctlinfo.Kp = atoi(val);
-    ser.print("{info: 'kp set to "); ser.print(ctlinfo.Kp); ser.println("'}");
+    ser.print("{\"info\": \"kp set to "); ser.print(ctlinfo.Kp); ser.println("\"}");
   } else if(name[0]=='k' && name[1]=='i' && name[2]==0) {
     ctlinfo.Ki = atoi(val);
-    ser.print("{info: 'ki set to "); ser.print(ctlinfo.Ki); ser.println("'}");
+    ser.print("{\"info\": \"ki set to "); ser.print(ctlinfo.Ki); ser.println("\"}");
   } else if(name[0]=='k' && name[1]=='d' && name[2]==0) {
     ctlinfo.Kd = atoi(val);
-    ser.print("{info: 'kd set to "); ser.print(ctlinfo.Kd); ser.println("'}");
+    ser.print("{\"info\": \"kd set to "); ser.print(ctlinfo.Kd); ser.println("\"}");
   } else if(name[0]=='d' && name[1]=='i' && name[2]=='n' && name[3]=='f' && name[4]==0) {
     ctlinfo.debug_info = atoi(val);
-    ser.print("{info: 'debug_info set to "); ser.print(ctlinfo.debug_info); ser.println("'}");
+    ser.print("{\"info\": \"debug_info set to "); ser.print(ctlinfo.debug_info); ser.println("\"}");
   } else if(name[0]=='d' && name[1]=='f' && name[2]=='r' && name[3]=='q' && name[4]==0) {
     ctlinfo.debug_freq = atoi(val);
-    ser.print("{info: 'debug_freq set to "); ser.print(ctlinfo.debug_freq); ser.println("'}");
+    ser.print("{\"info\": \"debug_freq set to "); ser.print(ctlinfo.debug_freq); ser.println("\"}");
   } else if(name[0]=='t' && name[1]=='s' && name[2]=='t' && name[3]=='n' && name[4]==0) {
     current_test = atoi(val);
-    ser.print("{info: 'current_test set to "); ser.print(current_test); ser.println("'}");
+    ser.print("{\"info\": \"current_test set to "); ser.print(current_test); ser.println("\"}");
   }    
     //  } else if(name[0]=='' && name[1]=='' && name[2]=='' && name[3]=='' && name[4]==0) {
 }

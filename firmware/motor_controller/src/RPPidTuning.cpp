@@ -81,9 +81,9 @@ void RPPidTuning::loop(rpctl_info* ctl) {
   }
 
   if(ctl->debug_info != last_debug_info || ctl->debug_freq != last_debug_freq) {
-    mot->set_debug_prints(debug_info, debug_freq);
-    last_debug_info = debug_info;
-    last_debug_freq = debug_freq;
+    mot->set_debug_prints(ctl->debug_info, ctl->debug_freq);
+    last_debug_info = ctl->debug_info;
+    last_debug_freq = ctl->debug_freq;
   }
 
   mot->loop();

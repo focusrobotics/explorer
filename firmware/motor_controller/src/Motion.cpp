@@ -75,7 +75,7 @@ void Motion::loop() {
   if(debug_info & (DEBUG_FLAG_DISP_MPOWER | DEBUG_FLAG_DISP_ETICKS | DEBUG_FLAG_DISP_ACT_VEL | DEBUG_FLAG_DISP_POSE)) {
     Serial.print("{ ");
     if(debug_info & DEBUG_FLAG_DISP_MPOWER) {
-      Serial.print("rmp: "); Serial.print(rMotorPower); Serial.print(", lmp: "); Serial.print(lMotorPower); Serial.print(", ");
+      Serial.print("\"rmp\": "); Serial.print(rMotorPower); Serial.print(", \"lmp\": "); Serial.print(lMotorPower); Serial.print(", ");
     }
     if(debug_info & DEBUG_FLAG_DISP_ETICKS) {
       //int32_t e1 = enc1.read();
@@ -83,11 +83,11 @@ void Motion::loop() {
       //Serial.print("e1: "); Serial.print(e1); Serial.print(", e2: "); Serial.print(e2); Serial.print(", ");
     }
     if(debug_info & DEBUG_FLAG_DISP_ACT_VEL) {
-      Serial.print("rvel: "); Serial.print(rMotorVelocity); Serial.print(", lvel: "); Serial.print(lMotorVelocity); Serial.print(", ");
+      Serial.print("\"rvel\": "); Serial.print(rMotorVelocity); Serial.print(", \"lvel\": "); Serial.print(lMotorVelocity); Serial.print(", ");
     }
     if(debug_info & DEBUG_FLAG_DISP_POSE) {
       robot_pose p = odom->get_pose();
-      Serial.print("x: "); Serial.print(p.x); Serial.print(", y: "); Serial.print(p.y); Serial.print(", heading: "); Serial.print(p.heading);
+      Serial.print("\"x\": "); Serial.print(p.x); Serial.print(", \"y\": "); Serial.print(p.y); Serial.print(", \"heading\": "); Serial.print(p.heading);
     }
     Serial.println(" }");
   }

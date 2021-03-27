@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=0">
+    <script type="text/javascript" src="https://rawgit.com/131/h264-live-player/master/vendor/dist/http-live-player.js"></script>
+  </head>
+  <body>
+    <h1>Video stream test</h1>
+    <script>
+      var canvas = document.createElement("canvas");
+      document.body.appendChild(canvas);
+ 
+      var wsavc = new WSAvcPlayer(canvas, "webgl");
+ 
+      wsavc.connect("ws://explorer:3000/api/vidstream");
+    </script> 
+  </body>
+</html>

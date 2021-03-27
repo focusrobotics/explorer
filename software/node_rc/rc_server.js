@@ -2,6 +2,7 @@
 // 
 // 
 const http = require('http');
+const WebSocket = require('ws');
 const fs = require('fs');
 
 const useSerial = !process.env.NO_SERIAL; // set NO_SERIAL in the environment to run without serial port deps
@@ -47,6 +48,29 @@ if(process.env.HOSTNAME != "explorer") {
 }
 
 var liveStreamEnabled = 0;
+
+var raspividStream = require('raspivid-stream');
+var videoStream;
+if(liveImages) {
+    videoStream = raspividStream();
+}
+
+const wss = new WebSocket.Server({ noServer: true });
+const wssVid = new WebSocket.Server({ noServer: true });
+wss.on('connection', function connection(ws) {
+    //
+    ws.on('message', function incoming(message) {
+	console.log('Status websocket received %s', message);
+    });
+    ws.send('websocket message from server');
+});
+wssVid.on('connection', function connection(ws) {
+    //
+    ws.on('message', function incoming(message) {
+	console.log('Video websocket received %s', message);
+    });
+    //ws.send('websocket message from server');
+});
 
 // Don't create the response at all until req.url is considered
 // if req.url starts with /api then pass it to the robot api object which will respond with json
@@ -228,6 +252,23 @@ const server = http.createServer((req, res) => {
     }
 });
 
+server.on('upgrade', function upgrade(request, socket, head) {
+    //const pathname = url.parse(request.url).pathname;
+    const pathname = request.url;
+
+    if (pathname === '/api/status') {
+	wss.handleUpgrade(request, socket, head, function done(ws) {
+	    wss.emit('connection', ws, request);
+	});
+    } else if (pathname === '/api/vidstream') {
+	wssVid.handleUpgrade(request, socket, head, function done(ws) {
+	    wssVid.emit('connection', ws, request);
+	});
+    } else {
+	socket.destroy();
+    }
+});
+
 server.listen(port, () => {
     console.log(`Server running at port ${port}`);
 })
@@ -236,6 +277,27 @@ server.listen(port, () => {
 // Probably send it to the client via websockets when I get that set up
 if(useSerial) {
     const lines = sp.pipe(new Readline())
-    lines.on('data', console.log)
+    lines.on('data', function(dat) {
+	console.log(dat);
+	// Probably should qualify the JSON from the micro, but for now just send it straight on to the web browser for display
+	//let parsedData = JSON.parse(dat);
+	//if(parsedData.foo != null) {
+	//    console.log("got heading");
+	//}
+	wss.clients.forEach(function each(client) {
+	    if(client.readyState === WebSocket.OPEN) {
+		client.send(dat);
+	    }
+	});
+    });
 }
 
+if(liveImages) {
+    videoStream.on('data', (data) => {
+	wss.clients.forEach(function each(client) {
+	    if(client.readyState === WebSocket.OPEN) {
+		client.send(data, { binary: true }, (error) => { if (error) console.error(error); });
+	    }
+	});
+    });
+}
